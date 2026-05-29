@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper"><div class="container">
+<h1 class="page-title">My Wishlist <span class="cart-count-badge" id="wishlistCount">{{ wishlist_items.count }}</span></h1>
+{% if wishlist_items %}
+<div class="products-grid" id="wishlistGrid">
+{% for item in wishlist_items %}
+<div class="product-card wishlist-item-card" data-aos="fade-up">
+    <div class="product-card-image">
+        <a href="{{ item.product.get_absolute_url }}">
+            <img src="{{ item.product.get_main_image_url }}" alt="{{ item.product.name }}" loading="lazy">
+            {% if not item.product.is_in_stock %}
+            <div class="out-of-stock-overlay"><span>Out of Stock</span></div>
+            {% endif %}
+        </a>
+        <!-- Toggle wishlist (remove) using wishlist-form for AJAX -->
+        <form method="post" action="{% url 'wishlist:toggle' item.product.id %}" class="wishlist-form">
+            {% csrf_token %}
+            <button type="submit" class="quick-action-btn wishlist-btn active" title="Remove from Wishlist">
+                <i class="fas fa-heart"></i>
+            </button>
+        </form>
+    </div>
+    <div class="product-card-body">
+        {% if item.product.brand %}
+        <span class="product-brand">{{ item.product.brand.name }}</span>
+        {% endif %}
+        <h3 class="product-name"><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h3>
+        <div class="product-price">
+            {% if item.product.discount_price %}
+            <span class="price-current">{{ item.product.discount_price|floatformat:0 }} kr</span>
+            <span class="price-original">{{ item.product.price|floatformat:0 }} kr</span>
+            {% else %}
+            <span class="price-current">{{ item.product.price|floatformat:0 }} kr</span>
+            {% endif %}
+        </div>
+        <a href="{{ item.product.get_absolute_url }}" class="add-to-cart-btn">View Product <i class="fas fa-arrow-right"></i></a>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state" id="wishlistEmpty">
+    <i class="fas fa-heart"></i>
+    <h3>Your Wishlist is Empty</h3>
+    <p>Save items you love to your wishlist and find them here anytime.</p>
+    <a href="{% url 'products:list' %}" class="btn-primary">Discover Products</a>
+</div>
+{% endif %}
+</div></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Override the generic checkEmptyWishlist for this page
+// to also update the count badge in the heading
+document.addEventListener('submit', function() {
+  setTimeout(function() {
+    const grid = document.getElementById('wishlistGrid');
+    if (!grid) return;
+    const cards = grid.querySelectorAll('.product-card');
+    const countEl = document.getElementById('wishlistCount');
+    if (countEl) countEl.textContent = cards.length;
+    if (cards.length === 0) {
+      grid.outerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-heart"></i>
+          <h3>Your Wishlist is Empty</h3>
+          <p>Save items you love to your wishlist and find them here anytime.</p>
+          <a href="/products/" class="btn-primary">Discover Products</a>
+        </div>`;
+    }
+  }, 350);
+});
+</script>
+{% endblock %}

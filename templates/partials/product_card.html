@@ -1,0 +1,80 @@
+{% load humanize %}
+<div class="product-card" data-aos="fade-up">
+    <div class="product-card-image">
+        <a href="{{ product.get_absolute_url }}">
+            <img src="{{ product.get_main_image_url }}" alt="{{ product.name }}" loading="lazy">
+            {% if product.discount_percentage > 0 %}
+            <span class="badge-sale">-{{ product.discount_percentage }}%</span>
+            {% endif %}
+            {% if product.is_featured %}
+            <span class="badge-featured">Featured</span>
+            {% endif %}
+            {% if not product.is_in_stock %}
+            <div class="out-of-stock-overlay"><span>Out of Stock</span></div>
+            {% endif %}
+        </a>
+
+        <!-- Quick Actions -->
+        <div class="product-quick-actions">
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'wishlist:toggle' product.id %}" class="wishlist-form">
+                {% csrf_token %}
+                <button type="submit" class="quick-action-btn wishlist-btn {% if product.id in wishlist_product_ids %}active{% endif %}" 
+                        title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </form>
+            {% else %}
+            <a href="{% url 'users:login' %}?next={{ product.get_absolute_url }}" class="quick-action-btn" title="Login to Wishlist">
+                <i class="fas fa-heart"></i>
+            </a>
+            {% endif %}
+            <a href="{{ product.get_absolute_url }}" class="quick-action-btn" title="Quick View">
+                <i class="fas fa-eye"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="product-card-body">
+        <div class="product-meta">
+            {% if product.brand %}
+            <span class="product-brand">{{ product.brand.name }}</span>
+            {% endif %}
+            <span class="product-gender">{{ product.get_gender_display }}</span>
+        </div>
+        <h3 class="product-name">
+            <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+        </h3>
+
+        <!-- Rating -->
+        {% if product.review_count > 0 %}
+        <div class="product-rating">
+            <div class="stars">
+                {% with rating=product.average_rating %}
+                {% for i in "12345" %}
+                <i class="fas fa-star {% if forloop.counter <= rating %}filled{% endif %}"></i>
+                {% endfor %}
+                {% endwith %}
+            </div>
+            <span class="rating-count">({{ product.review_count }})</span>
+        </div>
+        {% endif %}
+
+        <div class="product-price">
+            {% if product.discount_price %}
+            <span class="price-current">{{ product.discount_price|floatformat:0 }} kr</span>
+            <span class="price-original">{{ product.price|floatformat:0 }} kr</span>
+            {% else %}
+            <span class="price-current">{{ product.price|floatformat:0 }} kr</span>
+            {% endif %}
+        </div>
+
+        {% if product.is_in_stock %}
+        <a href="{{ product.get_absolute_url }}" class="add-to-cart-btn">
+            Select & Buy <i class="fas fa-arrow-right"></i>
+        </a>
+        {% else %}
+        <button class="add-to-cart-btn disabled" disabled>Out of Stock</button>
+        {% endif %}
+    </div>
+</div>

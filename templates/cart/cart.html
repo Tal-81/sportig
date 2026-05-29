@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="{% url 'core:home' %}">Home</a><span>/</span><span>Shopping Cart</span>
+        </nav>
+
+        <h1 class="page-title">Shopping Cart
+            <span class="cart-count-badge">{{ cart.total_items }} item{{ cart.total_items|pluralize }}</span>
+        </h1>
+
+        {% if cart.items %}
+        <div class="cart-layout">
+            <!-- Cart Items -->
+            <div class="cart-items-wrap">
+                {% for item in cart.items %}
+                <div class="cart-item" id="cartItem-{{ item.id }}">
+                    <div class="cart-item-img">
+                        <a href="{{ item.product.get_absolute_url }}">
+                            <img src="{{ item.product.get_main_image_url }}" alt="{{ item.product.name }}" loading="lazy">
+                        </a>
+                    </div>
+                    <div class="cart-item-details">
+                        <div class="cart-item-top">
+                            {% if item.product.brand %}
+                            <span class="cart-item-brand">{{ item.product.brand.name }}</span>
+                            {% endif %}
+                            <a href="{{ item.product.get_absolute_url }}" class="cart-item-name">{{ item.product.name }}</a>
+                            {% if item.variant %}
+                            <span class="cart-item-variant">
+                                <i class="fas fa-circle" style="color:{{ item.variant.color_hex }};font-size:10px;"></i>
+                                {{ item.variant.color }} / Size {{ item.variant.size }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="cart-item-bottom">
+                            <!-- Quantity -->
+                            <div class="cart-qty-control">
+                                <button class="qty-btn-sm" onclick="updateCartItem('{{ item.id }}', {{ item.quantity|add:'-1' }})">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="qty-val" id="qty-{{ item.id }}">{{ item.quantity }}</span>
+                                <button class="qty-btn-sm" onclick="updateCartItem('{{ item.id }}', {{ item.quantity|add:'1' }})">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="cart-item-price">
+                                <span class="item-unit">{{ item.unit_price|floatformat:0 }} kr each</span>
+                                <strong class="item-total" id="total-{{ item.id }}">{{ item.line_total|floatformat:0 }} kr</strong>
+                            </div>
+                            <form method="post" action="{% url 'cart:remove' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="cart-remove-btn" title="Remove">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Coupon -->
+                <div class="coupon-section">
+                    <h4><i class="fas fa-tag"></i> Have a coupon?</h4>
+                    <form method="post" action="{% url 'cart:apply_coupon' %}" class="coupon-form">
+                        {% csrf_token %}
+                        <input type="text" name="coupon_code"
+                               placeholder="Enter coupon code"
+                               value="{{ coupon_code|default:'' }}"
+                               class="coupon-input">
+                        <button type="submit" class="btn-coupon">Apply</button>
+                        {% if coupon_code %}
+                        <button type="submit" name="coupon_code" value="" class="btn-coupon-remove">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                        {% endif %}
+                    </form>
+                    {% if coupon_code and coupon_discount > 0 %}
+                    <div class="coupon-success">
+                        <i class="fas fa-check-circle"></i> Coupon <strong>{{ coupon_code }}</strong> applied!
+                        You save <strong>{{ coupon_discount|floatformat:0 }} kr</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="cart-summary">
+                <div class="summary-card">
+                    <h3>Order Summary</h3>
+                    <div class="summary-rows">
+                        <div class="summary-row">
+                            <span>Subtotal ({{ cart.total_items }} items)</span>
+                            <span id="summarySubtotal">{{ cart.subtotal|floatformat:0 }} kr</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span id="summaryShipping">{{ cart.shipping|floatformat:0 }} kr</span>
+                        </div>
+                        {% if coupon_discount > 0 %}
+                        <div class="summary-row discount-row">
+                            <span>Discount ({{ coupon_code }})</span>
+                            <span>-{{ coupon_discount|floatformat:0 }} kr</span>
+                        </div>
+                        {% endif %}
+                        <div class="summary-divider"></div>
+                        <div class="summary-row summary-total">
+                            <strong>Total</strong>
+                            <strong id="summaryTotal">{{ total_after_discount|floatformat:0 }} kr</strong>
+                        </div>
+                    </div>
+                    <div class="delivery-note">
+                        <i class="fas fa-truck"></i> Estimated delivery: 3–5 business days
+                    </div>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'orders:checkout' %}" class="btn-checkout">
+                        Proceed to Checkout <i class="fas fa-arrow-right"></i>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}" class="btn-checkout">
+                        Login to Checkout <i class="fas fa-arrow-right"></i>
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'products:list' %}" class="btn-continue">
+                        <i class="fas fa-arrow-left"></i> Continue Shopping
+                    </a>
+                </div>
+
+                <!-- Accepted Payments -->
+                <div class="payment-methods-card">
+                    <p>We Accept</p>
+                    <div class="payment-icons-row">
+                        <i class="fab fa-cc-visa fa-2x"></i>
+                        <i class="fab fa-cc-mastercard fa-2x"></i>
+                        <i class="fab fa-cc-amex fa-2x"></i>
+                        <i class="fas fa-lock" title="Secure Payment"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Empty Cart -->
+        <div class="empty-state cart-empty">
+            <i class="fas fa-shopping-bag"></i>
+            <h2>Your Cart is Empty</h2>
+            <p>Looks like you haven't added anything to your cart yet.</p>
+            <a href="{% url 'products:list' %}" class="btn-primary">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function updateCartItem(itemId, qty) {
+    const resp = await fetch(`/cart/update/${itemId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: `quantity=${qty}`,
+    });
+    const data = await resp.json();
+    if (data.success) {
+        if (qty <= 0) {
+            document.getElementById(`cartItem-${itemId}`)?.remove();
+        } else {
+            document.getElementById(`qty-${itemId}`).textContent = qty;
+        }
+        document.getElementById('summarySubtotal').textContent = Math.round(data.subtotal) + ' kr';
+        document.getElementById('summaryShipping').textContent = Math.round(data.shipping) + ' kr';
+        document.getElementById('summaryTotal').textContent = Math.round(data.total) + ' kr';
+        document.getElementById('cartBadge') && (document.getElementById('cartBadge').textContent = data.total_items);
+        if (data.total_items === 0) location.reload();
+    } else {
+        alert(data.message || 'Could not update quantity.');
+    }
+}
+
+function getCookie(name) {
+    const v = `; ${document.cookie}`.split(`; ${name}=`);
+    if (v.length === 2) return v.pop().split(';').shift();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="{% url 'core:home' %}">Home</a>
+            <span>/</span>
+            {% if category %}<a href="{% url 'products:list' %}">Products</a><span>/</span>
+            <span>{{ category.name }}</span>
+            {% elif query %}<span>Search: "{{ query }}"</span>
+            {% else %}<span>All Products</span>{% endif %}
+        </nav>
+
+        <div class="shop-layout">
+            <!-- Sidebar Filters -->
+            <aside class="shop-sidebar" id="shopSidebar">
+                <div class="sidebar-header">
+                    <h3>Filter</h3>
+                    <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+                </div>
+
+                <form method="GET" id="filterForm">
+                    {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+
+                    <!-- Category -->
+                    <div class="filter-group">
+                        <h4 class="filter-title">Category</h4>
+                        <div class="filter-options">
+                            <label class="filter-option">
+                                <input type="radio" name="category" value=""
+                                    {% if not selected_category %}checked{% endif %}
+                                    onchange="this.form.submit()">
+                                <span>All Categories</span>
+                            </label>
+                            {% for cat in categories %}
+                            <label class="filter-option">
+                                <input type="radio" name="category" value="{{ cat.slug }}"
+                                    {% if selected_category == cat.slug %}checked{% endif %}
+                                    onchange="this.form.submit()">
+                                <span>{{ cat.name }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="filter-group">
+                        <h4 class="filter-title">Gender</h4>
+                        <div class="filter-options">
+                            {% for val, label in genders %}
+                            <label class="filter-option">
+                                <input type="radio" name="gender" value="{{ val }}"
+                                    {% if selected_gender == val %}checked{% endif %}
+                                    onchange="this.form.submit()">
+                                <span>{{ label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="filter-group">
+                        <h4 class="filter-title">Price Range (kr)</h4>
+                        <div class="price-range-inputs">
+                            <input type="number" name="min_price" placeholder="Min"
+                                value="{{ min_price }}" class="price-input">
+                            <span>—</span>
+                            <input type="number" name="max_price" placeholder="Max"
+                                value="{{ max_price }}" class="price-input">
+                        </div>
+                        <button type="submit" class="btn-apply-filter">Apply</button>
+                    </div>
+
+                    <!-- Brands -->
+                    {% if brands %}
+                    <div class="filter-group">
+                        <h4 class="filter-title">Brand</h4>
+                        <div class="filter-options scrollable">
+                            {% for brand in brands %}
+                            <label class="filter-option">
+                                <input type="checkbox" name="brand" value="{{ brand.id }}"
+                                    {% if selected_brand == brand.id|stringformat:"s" %}checked{% endif %}
+                                    onchange="this.form.submit()">
+                                <span>{{ brand.name }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Clear Filters -->
+                    <a href="{% url 'products:list' %}" class="btn-clear-filter">
+                        <i class="fas fa-times"></i> Clear All Filters
+                    </a>
+                </form>
+            </aside>
+
+            <!-- Products Area -->
+            <div class="shop-main">
+                <!-- Top Bar -->
+                <div class="shop-topbar">
+                    <div class="shop-results">
+                        {% if query %}
+                        <h1 class="shop-heading">Results for <em>"{{ query }}"</em></h1>
+                        {% elif category %}
+                        <h1 class="shop-heading">{{ category.name }}</h1>
+                        {% else %}
+                        <h1 class="shop-heading">All Products</h1>
+                        {% endif %}
+                        <span class="results-count">{{ total_count }} product{{ total_count|pluralize }}</span>
+                    </div>
+                    <div class="shop-controls">
+                        <button class="filter-toggle-btn" id="filterToggle">
+                            <i class="fas fa-sliders-h"></i> Filter
+                        </button>
+                        <form method="GET" id="sortForm">
+                            {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                            {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                            {% if selected_gender %}<input type="hidden" name="gender" value="{{ selected_gender }}">{% endif %}
+                            <select name="sort" class="sort-select" onchange="this.form.submit()">
+                                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+                                <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option>
+                                <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                                <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                {% if products %}
+                <div class="products-grid shop-grid">
+                    {% for product in products %}
+                    {% include 'partials/product_card.html' with product=product %}
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if products.has_other_pages %}
+                <div class="pagination-wrap">
+                    <nav class="pagination">
+                        {% if products.has_previous %}
+                        <a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_gender %}&gender={{ selected_gender }}{% endif %}&sort={{ sort_by }}"
+                            class="page-btn page-prev"><i class="fas fa-chevron-left"></i></a>
+                        {% endif %}
+
+                        {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                        <span class="page-btn active">{{ num }}</span>
+                        {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                        <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_gender %}&gender={{ selected_gender }}{% endif %}&sort={{ sort_by }}"
+                            class="page-btn">{{ num }}</a>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if products.has_next %}
+                        <a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_gender %}&gender={{ selected_gender }}{% endif %}&sort={{ sort_by }}"
+                            class="page-btn page-next"><i class="fas fa-chevron-right"></i></a>
+                        {% endif %}
+                    </nav>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <i class="fas fa-search"></i>
+                    <h3>No products found</h3>
+                    {% if query %}
+                    <p>No results for <strong>"{{ query }}"</strong>. Try different keywords or browse our categories.</p>
+                    {% else %}
+                    <p>No products match your current filters.</p>
+                    {% endif %}
+                    <a href="{% url 'products:list' %}" class="btn-primary">Browse All Products</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const sidebar = document.getElementById('shopSidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+document.getElementById('filterToggle')?.addEventListener('click', () => {
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+});
+
+function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('sidebarClose')?.addEventListener('click', closeSidebar);
+overlay?.addEventListener('click', closeSidebar);
+</script>
+{% endblock %}

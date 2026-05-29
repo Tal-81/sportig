@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper"><div class="container container-sm">
+<nav class="breadcrumb"><a href="{% url 'support:list' %}">Support</a><span>/</span><span>Ticket #{{ ticket.id }}</span></nav>
+<div class="ticket-detail-card">
+    <div class="ticket-detail-header">
+        <div>
+            <h1 class="ticket-subject-title">{{ ticket.subject }}</h1>
+            <small>Created {{ ticket.created_at|date:"d M Y, H:i" }}</small>
+        </div>
+        <span class="status-badge ticket-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+    </div>
+    <!-- Original message -->
+    <div class="ticket-message original">
+        <div class="message-avatar user-avatar">{{ request.user.first_name|first|upper }}</div>
+        <div class="message-bubble">
+            <div class="message-meta"><strong>You</strong> <time>{{ ticket.created_at|date:"d M Y, H:i" }}</time></div>
+            <p>{{ ticket.message }}</p>
+        </div>
+    </div>
+    <!-- Replies -->
+    {% for reply in replies %}
+    <div class="ticket-message {% if reply.is_staff_reply %}staff{% else %}user{% endif %}">
+        <div class="message-avatar {% if reply.is_staff_reply %}staff-avatar{% else %}user-avatar{% endif %}">
+            {% if reply.is_staff_reply %}<i class="fas fa-headset"></i>{% else %}{{ reply.author.first_name|first|upper }}{% endif %}
+        </div>
+        <div class="message-bubble {% if reply.is_staff_reply %}staff-bubble{% endif %}">
+            <div class="message-meta">
+                <strong>{% if reply.is_staff_reply %}Support Team{% else %}You{% endif %}</strong>
+                <time>{{ reply.created_at|date:"d M Y, H:i" }}</time>
+            </div>
+            <p>{{ reply.message }}</p>
+        </div>
+    </div>
+    {% endfor %}
+    <!-- Reply form -->
+    {% if ticket.status != 'closed' %}
+    <div class="reply-form-wrap">
+        <h4>Add Reply</h4>
+        <form method="post">{% csrf_token %}
+            {{ form.message }}
+            <button type="submit" class="btn-primary mt-2">Send Reply <i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+    {% else %}
+    <div class="alert-info">This ticket is closed.</div>
+    {% endif %}
+</div></div></div>
+{% endblock %}

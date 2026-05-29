@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Hero Slider -->
+<section class="hero-section">
+    {% if banners %}
+    <div class="swiper hero-swiper">
+        <div class="swiper-wrapper">
+            {% for banner in banners %}
+            <div class="swiper-slide hero-slide" style="background-image: url('{{ banner.image.url }}');">
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1 class="hero-title" data-aos="fade-up">{{ banner.title }}</h1>
+                    {% if banner.subtitle %}
+                    <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="100">{{ banner.subtitle }}</p>
+                    {% endif %}
+                    <a href="{{ banner.button_url }}" class="hero-btn" data-aos="fade-up" data-aos-delay="200">
+                        {{ banner.button_text }} <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+    {% else %}
+    <div class="hero-fallback">
+        <div class="hero-content">
+            <h1 class="hero-title">Performance Meets Style</h1>
+            <p class="hero-subtitle">Shop the latest sportswear, sneakers and equipment</p>
+            <a href="{% url 'products:list' %}" class="hero-btn">Shop Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Category Pills -->
+<section class="categories-strip">
+    <div class="container">
+        <div class="swiper cats-swiper">
+            <div class="swiper-wrapper">
+                {% for cat in categories %}
+                <div class="swiper-slide cat-slide">
+                    <a href="{% url 'products:category' cat.slug %}" class="cat-pill">
+                        {% if cat.image %}
+                        <div class="cat-pill-img" style="background-image:url('{{ cat.image.url }}')"></div>
+                        {% else %}
+                        <div class="cat-pill-img cat-placeholder"><i class="fas fa-tag"></i></div>
+                        {% endif %}
+                        <span>{{ cat.name }}</span>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="products-section" id="featured">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <div class="section-label">Hand-picked</div>
+            <h2 class="section-title">Featured Products</h2>
+            <a href="{% url 'products:list' %}?sort=popular" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="swiper products-swiper" data-aos="fade-up" data-aos-delay="100">
+            <div class="swiper-wrapper">
+                {% for product in featured_products %}
+                <div class="swiper-slide">
+                    {% include 'partials/product_card.html' with product=product %}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-button-next prod-next"></div>
+            <div class="swiper-button-prev prod-prev"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Promo Banner -->
+<section class="promo-banner" data-aos="fade-up">
+    <div class="container">
+        <div class="promo-grid">
+            <div class="promo-card promo-card-dark">
+                <div class="promo-content">
+                    <span class="promo-tag">Men's Collection</span>
+                    <h3>Built for Champions</h3>
+                    <p>High-performance gear for every sport</p>
+                    <a href="{% url 'products:list' %}?gender=men" class="promo-btn">Shop Men <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="promo-card promo-card-light">
+                <div class="promo-content">
+                    <span class="promo-tag">Women's Collection</span>
+                    <h3>Power Your Performance</h3>
+                    <p>Style meets serious athletic performance</p>
+                    <a href="{% url 'products:list' %}?gender=women" class="promo-btn">Shop Women <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="promo-card promo-card-accent">
+                <div class="promo-content">
+                    <span class="promo-tag">Kids' Collection</span>
+                    <h3>Little Athletes</h3>
+                    <p>Let them play, let them shine</p>
+                    <a href="{% url 'products:list' %}?gender=kids" class="promo-btn">Shop Kids <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trending Products -->
+{% if trending_products %}
+<section class="products-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <div class="section-label">Most Viewed</div>
+            <h2 class="section-title">Trending Now</h2>
+            <a href="{% url 'products:list' %}?sort=popular" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="products-grid" data-aos="fade-up">
+            {% for product in trending_products %}
+            {% include 'partials/product_card.html' with product=product %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Best Sellers -->
+{% if best_sellers %}
+<section class="products-section section-dark">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <div class="section-label">Top Picks</div>
+            <h2 class="section-title">Best Sellers</h2>
+            <a href="{% url 'products:list' %}?sort=popular" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="swiper products-swiper" data-aos="fade-up">
+            <div class="swiper-wrapper">
+                {% for product in best_sellers %}
+                <div class="swiper-slide">
+                    {% include 'partials/product_card.html' with product=product %}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-button-next prod-next"></div>
+            <div class="swiper-button-prev prod-prev"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- USP Strips -->
+<section class="usp-section" data-aos="fade-up">
+    <div class="container">
+        <div class="usp-grid">
+            <div class="usp-item">
+                <i class="fas fa-shipping-fast"></i>
+                <div>
+                    <h4>Fast Delivery</h4>
+                    <p>3–5 business days across Sweden</p>
+                </div>
+            </div>
+            <div class="usp-item">
+                <i class="fas fa-undo-alt"></i>
+                <div>
+                    <h4>30-Day Returns</h4>
+                    <p>Hassle-free return policy</p>
+                </div>
+            </div>
+            <div class="usp-item">
+                <i class="fas fa-lock"></i>
+                <div>
+                    <h4>Secure Payments</h4>
+                    <p>Powered by Stripe — encrypted & safe</p>
+                </div>
+            </div>
+            <div class="usp-item">
+                <i class="fas fa-headset"></i>
+                <div>
+                    <h4>24/7 Support</h4>
+                    <p>Our team is always here to help</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- New Arrivals -->
+{% if new_arrivals %}
+<section class="products-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <div class="section-label">Fresh In</div>
+            <h2 class="section-title">New Arrivals</h2>
+            <a href="{% url 'products:list' %}?sort=newest" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="products-grid" data-aos="fade-up">
+            {% for product in new_arrivals %}
+            {% include 'partials/product_card.html' with product=product %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- FAQ Section -->
+<section class="faq-section" id="faq">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <div class="section-label">Got Questions?</div>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+        <div class="faq-grid" data-aos="fade-up">
+            {% for faq in faqs %}
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>{{ faq.question }}</span>
+                    <i class="fas fa-plus faq-icon"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>{{ faq.answer }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter-section" data-aos="fade-up">
+    <div class="container">
+        <div class="newsletter-inner">
+            <div class="newsletter-text">
+                <h2>Stay Ahead of the Game</h2>
+                <p>Subscribe for exclusive deals, new arrivals, and sports culture.</p>
+            </div>
+            <form class="newsletter-main-form" action="{% url 'core:newsletter_signup' %}" method="POST">
+                {% csrf_token %}
+                <div class="newsletter-main-group">
+                    <input type="email" name="email" placeholder="Enter your email address" required>
+                    <button type="submit">Subscribe <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Hero Swiper
+new Swiper('.hero-swiper', {
+    loop: true,
+    autoplay: { delay: 5000, disableOnInteraction: false },
+    effect: 'fade',
+    fadeEffect: { crossFade: true },
+    pagination: { el: '.swiper-pagination', clickable: true },
+    navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+    speed: 800,
+});
+
+// Categories Swiper
+new Swiper('.cats-swiper', {
+    slidesPerView: 'auto',
+    spaceBetween: 16,
+    freeMode: true,
+});
+
+// Products Swiper
+document.querySelectorAll('.products-swiper').forEach(el => {
+    new Swiper(el, {
+        slidesPerView: 1,
+        spaceBetween: 24,
+        navigation: {
+            nextEl: el.querySelector('.prod-next'),
+            prevEl: el.querySelector('.prod-prev'),
+        },
+        breakpoints: {
+            480: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            1024: { slidesPerView: 4 },
+        },
+    });
+});
+
+// FAQ toggle
+function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const answer = item.querySelector('.faq-answer');
+    const icon = btn.querySelector('.faq-icon');
+    const isOpen = item.classList.contains('open');
+
+    document.querySelectorAll('.faq-item.open').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-answer').style.maxHeight = null;
+        i.querySelector('.faq-icon').className = 'fas fa-plus faq-icon';
+    });
+
+    if (!isOpen) {
+        item.classList.add('open');
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        icon.className = 'fas fa-minus faq-icon';
+    }
+}
+</script>
+{% endblock %}

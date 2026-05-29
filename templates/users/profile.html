@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+        <div class="profile-layout">
+            <!-- Sidebar -->
+            <aside class="profile-sidebar">
+                <div class="profile-sidebar-card">
+                    <div class="profile-avatar-wrap">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="profile-avatar-img">
+                        {% else %}
+                        <div class="profile-avatar-placeholder">
+                            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                        </div>
+                        {% endif %}
+                        <div class="profile-avatar-name">
+                            <strong>{{ user.get_full_name|default:user.username }}</strong>
+                            <small>{{ user.email }}</small>
+                        </div>
+                    </div>
+                    <nav class="profile-nav">
+                        <a href="{% url 'users:profile' %}" class="profile-nav-link active">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                        <a href="{% url 'orders:list' %}" class="profile-nav-link">
+                            <i class="fas fa-box"></i> My Orders
+                        </a>
+                        <a href="{% url 'wishlist:wishlist' %}" class="profile-nav-link">
+                            <i class="fas fa-heart"></i> Wishlist
+                            {% if wishlist_count > 0 %}<span class="nav-badge">{{ wishlist_count }}</span>{% endif %}
+                        </a>
+                        <a href="{% url 'support:list' %}" class="profile-nav-link">
+                            <i class="fas fa-headset"></i> Support Tickets
+                        </a>
+                        <a href="{% url 'users:edit_profile' %}" class="profile-nav-link">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'users:change_password' %}" class="profile-nav-link">
+                            <i class="fas fa-key"></i> Change Password
+                        </a>
+                        {% if user.can_delete_account %}
+                        <a href="{% url 'users:delete_account' %}" class="profile-nav-link danger">
+                            <i class="fas fa-trash-alt"></i> Delete Account
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="profile-main">
+                <!-- Account Info -->
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <h2>Account Information</h2>
+                        <a href="{% url 'users:edit_profile' %}" class="btn-sm-outline">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </div>
+                    <div class="profile-info-grid">
+                        <div class="info-item">
+                            <label>Full Name</label>
+                            <span>{{ user.get_full_name|default:"—" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email</label>
+                            <span>{{ user.email }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Username</label>
+                            <span>{{ user.username }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Phone</label>
+                            <span>{{ user.phone_number|default:"—" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Member Since</label>
+                            <span>{{ user.created_at|date:"d F Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <h2>Shipping Address</h2>
+                        <a href="{% url 'users:edit_profile' %}" class="btn-sm-outline">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </div>
+                    {% if user.has_complete_address %}
+                    <address class="address-display">
+                        {{ user.street_name }} {{ user.building_number }}<br>
+                        {{ user.postal_code }} {{ user.city }}<br>
+                        {{ user.country }}
+                    </address>
+                    {% else %}
+                    <p class="no-address">
+                        <i class="fas fa-map-marker-alt"></i>
+                        No address saved. <a href="{% url 'users:edit_profile' %}">Add your address</a>
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <h2>Recent Orders</h2>
+                        <a href="{% url 'orders:list' %}" class="btn-sm-outline">View All</a>
+                    </div>
+                    {% if orders %}
+                    <div class="recent-orders-list">
+                        {% for order in orders %}
+                        <div class="recent-order-item">
+                            <div class="recent-order-info">
+                                <strong>#{{ order.order_number }}</strong>
+                                <small>{{ order.created_at|date:"d M Y" }}</small>
+                            </div>
+                            <div class="recent-order-items">
+                                {{ order.items.count }} item{{ order.items.count|pluralize }}
+                            </div>
+                            <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+                            <strong>{{ order.total|floatformat:0 }} kr</strong>
+                            <a href="{% url 'orders:detail' order.order_number %}" class="btn-sm-outline">View</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state small">
+                        <i class="fas fa-box-open"></i>
+                        <p>No orders yet. <a href="{% url 'products:list' %}">Start shopping!</a></p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

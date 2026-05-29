@@ -1,0 +1,140 @@
+<footer class="footer">
+    <div class="footer-top">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Brand -->
+                <div class="footer-brand">
+                    <a href="{% url 'core:home' %}" class="footer-logo">
+                        <span class="logo-sportig">Sportig</span>
+                    </a>
+                    <p>Your destination for premium sports and lifestyle products. Quality, performance, and style — all in one place.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <!-- Shop Links -->
+                <div class="footer-col">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="{% url 'products:list' %}?gender=men">Men</a></li>
+                        <li><a href="{% url 'products:list' %}?gender=women">Women</a></li>
+                        <li><a href="{% url 'products:list' %}?gender=kids">Kids</a></li>
+                        <li><a href="{% url 'products:category' 'sneakers' %}">Sneakers</a></li>
+                        <li><a href="{% url 'products:category' 'sportswear' %}">Sportswear</a></li>
+                        <li><a href="{% url 'products:list' %}?sort=newest">New Arrivals</a></li>
+                        <li><a href="{% url 'products:list' %}?sort=popular">Best Sellers</a></li>
+                    </ul>
+                </div>
+
+                <!-- Help Links -->
+                <div class="footer-col">
+                    <h4>Help</h4>
+                    <ul>
+                        <li><a href="{% url 'support:create' %}">Contact Us</a></li>
+                        <li><a href="{% url 'support:list' %}">My Tickets</a></li>
+                        <li><a href="{% url 'orders:list' %}">Track Order</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">Size Guide</a></li>
+                        <li><a href="#">Shipping Info</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Account Links -->
+                <div class="footer-col">
+                    <h4>Account</h4>
+                    <ul>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'users:profile' %}">My Profile</a></li>
+                        <li><a href="{% url 'orders:list' %}">My Orders</a></li>
+                        <li><a href="{% url 'wishlist:wishlist' %}">Wishlist</a></li>
+                        <li><a href="{% url 'users:edit_profile' %}">Edit Profile</a></li>
+                        <li><a href="{% url 'users:change_password' %}">Change Password</a></li>
+                        {% else %}
+                        <li><a href="{% url 'users:login' %}">Login</a></li>
+                        <li><a href="{% url 'users:register' %}">Create Account</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="footer-newsletter">
+                    <h4>Stay in the Game</h4>
+                    <p>Subscribe to get exclusive deals, new arrivals, and insider access.</p>
+                    <form class="newsletter-form" id="footerNewsletter">
+                        {% csrf_token %}
+                        <div class="newsletter-input-group">
+                            <input type="email" name="email" placeholder="Your email address" required>
+                            <button type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <p class="newsletter-legal">By subscribing, you agree to receive marketing emails. Unsubscribe anytime.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="footer-bottom-content">
+                <p>&copy; {% now "Y" %} Sportig Sweden. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Policy</a>
+                    <a href="/sitemap.xml">Sitemap</a>
+                </div>
+                <div class="payment-icons">
+                    <i class="fab fa-cc-visa" title="Visa"></i>
+                    <i class="fab fa-cc-mastercard" title="Mastercard"></i>
+                    <i class="fab fa-cc-amex" title="Amex"></i>
+                    <i class="fab fa-stripe" title="Stripe"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+// Footer newsletter AJAX
+document.getElementById('footerNewsletter')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = this;
+    const email = form.querySelector('input[name="email"]').value;
+    const btn = form.querySelector('button[type="submit"]');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const resp = await fetch("{% url 'core:newsletter_signup' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: `email=${encodeURIComponent(email)}`
+        });
+        const data = await resp.json();
+        if (data.success) {
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            form.reset();
+        }
+    } catch(e) {
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+});
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+</script>

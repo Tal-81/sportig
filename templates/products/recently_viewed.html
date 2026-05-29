@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper"><div class="container">
+<h1 class="page-title">Recently Viewed</h1>
+{% if products %}
+<div class="products-grid">
+{% for product in products %}{% include 'partials/product_card.html' with product=product %}{% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+<i class="fas fa-history"></i>
+<h3>No Recently Viewed Products</h3>
+<p>Products you view will appear here.</p>
+<a href="{% url 'products:list' %}" class="btn-primary">Browse Products</a>
+</div>
+{% endif %}
+</div></div>
+{% endblock %}

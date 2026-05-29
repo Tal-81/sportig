@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="{% url 'core:home' %}">Home</a><span>/</span>
+            <a href="{% url 'orders:list' %}">My Orders</a><span>/</span>
+            <span>#{{ order.order_number }}</span>
+        </nav>
+
+        <div class="order-detail-header">
+            <div>
+                <h1 class="page-title">Order #{{ order.order_number }}</h1>
+                <p class="order-date">Placed on {{ order.created_at|date:"d F Y, H:i" }}</p>
+            </div>
+            <div class="order-header-actions">
+                {% if order.payment_status == 'completed' %}
+                <a href="{% url 'orders:invoice' order.order_number %}" class="btn-outline">
+                    <i class="fas fa-download"></i> Download Invoice
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="order-detail-layout">
+            <!-- Left: Items + Addresses -->
+            <div class="order-detail-main">
+                <!-- Status Timeline -->
+                <div class="order-status-card">
+                    <h3>Order Status</h3>
+                    <div class="status-timeline">
+                        {% for status, label in order.STATUS_CHOICES %}
+                        <div class="timeline-step {% if order.status == status %}active{% elif order.status > status %}done{% endif %}">
+                            <div class="timeline-dot"></div>
+                            <span>{{ label }}</span>
+                        </div>
+                        {% if not forloop.last %}<div class="timeline-line"></div>{% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div class="order-items-card">
+                    <h3>Order Items</h3>
+                    {% for item in order.items.all %}
+                    <div class="order-item-row">
+                        {% if item.product %}
+                        <img src="{{ item.product.get_main_image_url }}" alt="{{ item.product_name }}" class="order-item-img">
+                        {% else %}
+                        <div class="order-item-img placeholder-img"><i class="fas fa-image"></i></div>
+                        {% endif %}
+                        <div class="order-item-info">
+                            <strong>{{ item.product_name }}</strong>
+                            {% if item.variant_info %}<small>{{ item.variant_info }}</small>{% endif %}
+                            <small>Qty: {{ item.quantity }}</small>
+                        </div>
+                        <div class="order-item-price">
+                            <span>{{ item.unit_price|floatformat:0 }} kr × {{ item.quantity }}</span>
+                            <strong>{{ item.line_total|floatformat:0 }} kr</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="order-address-card">
+                    <h3>Shipping Address</h3>
+                    <address>
+                        <strong>{{ order.shipping_first_name }} {{ order.shipping_last_name }}</strong><br>
+                        {{ order.shipping_email }}<br>
+                        {% if order.shipping_phone %}{{ order.shipping_phone }}<br>{% endif %}
+                        {{ order.shipping_street }} {{ order.shipping_building }}<br>
+                        {{ order.shipping_postal_code }} {{ order.shipping_city }}<br>
+                        {{ order.shipping_country }}
+                    </address>
+                </div>
+            </div>
+
+            <!-- Right: Summary -->
+            <div class="order-detail-summary">
+                <div class="summary-card">
+                    <h3>Payment Summary</h3>
+                    <div class="summary-rows">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>{{ order.subtotal|floatformat:0 }} kr</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span>{{ order.shipping_fee|floatformat:0 }} kr</span>
+                        </div>
+                        {% if order.discount_amount > 0 %}
+                        <div class="summary-row discount-row">
+                            <span>Discount ({{ order.coupon_code }})</span>
+                            <span>-{{ order.discount_amount|floatformat:0 }} kr</span>
+                        </div>
+                        {% endif %}
+                        <div class="summary-divider"></div>
+                        <div class="summary-row summary-total">
+                            <strong>Total</strong>
+                            <strong>{{ order.total|floatformat:0 }} kr</strong>
+                        </div>
+                    </div>
+                    <div class="payment-status-badge payment-{{ order.payment_status }}">
+                        <i class="fas fa-credit-card"></i>
+                        Payment: {{ order.get_payment_status_display }}
+                    </div>
+                </div>
+
+                <a href="{% url 'support:create' %}" class="btn-outline full-width mt-2">
+                    <i class="fas fa-headset"></i> Need Help? Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

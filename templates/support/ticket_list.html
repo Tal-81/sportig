@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper"><div class="container">
+<div class="support-header">
+    <h1 class="page-title">Support Tickets</h1>
+    <a href="{% url 'support:create' %}" class="btn-primary"><i class="fas fa-plus"></i> New Ticket</a>
+</div>
+{% if tickets %}
+<div class="tickets-list">
+{% for ticket in tickets %}
+<div class="ticket-card">
+    <div class="ticket-info">
+        <div class="ticket-id">#{{ ticket.id }}</div>
+        <div class="ticket-content">
+            <strong class="ticket-subject">{{ ticket.subject }}</strong>
+            <small>{{ ticket.created_at|date:"d M Y, H:i" }}</small>
+        </div>
+    </div>
+    <div class="ticket-meta">
+        <span class="status-badge ticket-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+        <span class="ticket-replies"><i class="fas fa-comment"></i> {{ ticket.replies.count }}</span>
+        <a href="{% url 'support:detail' ticket.id %}" class="btn-sm-outline">View</a>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-headset"></i>
+    <h3>No Support Tickets</h3>
+    <p>Have a question or issue? Create a support ticket and we'll help you.</p>
+    <a href="{% url 'support:create' %}" class="btn-primary">Create Ticket</a>
+</div>
+{% endif %}
+</div></div>
+{% endblock %}

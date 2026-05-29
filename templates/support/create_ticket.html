@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper"><div class="container container-sm">
+<nav class="breadcrumb"><a href="{% url 'support:list' %}">Support</a><span>/</span><span>New Ticket</span></nav>
+<div class="form-page-card">
+<h1 class="form-page-title"><i class="fas fa-headset"></i> New Support Ticket</h1>
+<form method="post" class="support-form">{% csrf_token %}
+<div class="form-group"><label>Subject *</label>{{ form.subject }}{% if form.subject.errors %}<span class="field-error">{{ form.subject.errors.0 }}</span>{% endif %}</div>
+<div class="form-group"><label>Message *</label>{{ form.message }}{% if form.message.errors %}<span class="field-error">{{ form.message.errors.0 }}</span>{% endif %}</div>
+<div class="form-actions"><button type="submit" class="btn-primary">Submit Ticket</button><a href="{% url 'support:list' %}" class="btn-outline">Cancel</a></div>
+</form></div></div></div>
+{% endblock %}

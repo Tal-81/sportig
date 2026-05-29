@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-wrapper">
+    <div class="container container-sm">
+        <nav class="breadcrumb">
+            <a href="{% url 'users:profile' %}">Profile</a><span>/</span><span>Edit Profile</span>
+        </nav>
+        <div class="form-page-card">
+            <h1 class="form-page-title">Edit Profile</h1>
+            <form method="post" enctype="multipart/form-data" class="profile-form">
+                {% csrf_token %}
+                <h3 class="form-section-title">Personal Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>{{ form.first_name }}
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>{{ form.last_name }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Username</label>{{ form.username }}
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>{{ form.phone_number }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Profile Photo</label>{{ form.avatar }}
+                    {% if user.avatar %}
+                    <div class="current-avatar">
+                        <img src="{{ user.avatar.url }}" alt="Current avatar" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-top:8px;">
+                    </div>
+                    {% endif %}
+                </div>
+
+                <h3 class="form-section-title">Shipping Address</h3>
+                <div class="form-row">
+                    <div class="form-group form-group-lg">
+                        <label>Street Name</label>{{ form.street_name }}
+                    </div>
+                    <div class="form-group">
+                        <label>Building/Apt</label>{{ form.building_number }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Postal Code</label>{{ form.postal_code }}
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>{{ form.city }}
+                    </div>
+                    <div class="form-group">
+                        <label>Country</label>{{ form.country }}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                    <a href="{% url 'users:profile' %}" class="btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

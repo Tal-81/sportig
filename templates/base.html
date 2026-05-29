@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title|default:"Sportig - Premium Sports & Lifestyle" }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Shop the latest sportswear, sneakers, and equipment at Sportig Sweden.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}sportswear, sneakers, gym equipment, Sportig Sweden{% endblock %}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}{{ page_title|default:'Sportig Sweden' }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Premium sports & lifestyle shopping{% endblock %}">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- AOS Animations -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        <p>🚚 Free delivery on orders over 999 kr &nbsp;|&nbsp; 🔄 30-day returns &nbsp;|&nbsp; 📦 Ships in 3-5 business days</p>
+    </div>
+
+    <!-- Navigation -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- Session Expired Alert -->
+    {% if session_expired %}
+    <div class="session-alert">
+        <div class="container">
+            <i class="fas fa-clock"></i> Your session expired due to inactivity. Please log in again.
+            <button onclick="this.parentElement.parentElement.remove()" class="close-alert">&times;</button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Django Messages -->
+    {% if messages %}
+    <div class="messages-container" id="messagesContainer">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="close-alert">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% include 'partials/footer.html' %}
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        // Initialize AOS
+        AOS.init({ duration: 700, easing: 'ease-out', once: true, offset: 60 });
+
+        // Auto-dismiss messages after 4s
+        setTimeout(() => {
+            const container = document.getElementById('messagesContainer');
+            if (container) container.style.opacity = '0';
+            setTimeout(() => container && container.remove(), 500);
+        }, 4000);
+    </script>
+</body>
+</html>
