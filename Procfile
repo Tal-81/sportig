@@ -1,2 +1,2 @@
-web: gunicorn ecommerce.wsgi --log-file -
+web: gunicorn ecommerce.wsgi --log-file - --workers 2 --timeout 120
 release: python manage.py migrate --noinput && python manage.py collectstatic --noinput

@@ -1,12 +1,35 @@
 'use strict';
 
 // =====================
-// Utility Functions
+// CSRF Token Helper
 // =====================
 function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// read the token from meta tag (priority) or cookie or hidden input
+function getCSRFToken() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  if (meta && meta.getAttribute('content')) {
+    return meta.getAttribute('content');
+  }
+  const fromCookie = getCookie('csrftoken');
+  if (fromCookie) return fromCookie;
+
+  const hidden = document.querySelector('input[name="csrfmiddlewaretoken"]');
+  if (hidden) return hidden.value;
+
   return '';
 }
 
@@ -20,7 +43,8 @@ function showToast(message, type = 'success') {
   }
   const toast = document.createElement('div');
   toast.className = `alert alert-${type}`;
-  toast.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" class="close-alert">&times;</button>`;
+  toast.innerHTML = `<span>${message}</span>
+    <button onclick="this.parentElement.remove()" class="close-alert">&times;</button>`;
   container.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0';
@@ -29,12 +53,12 @@ function showToast(message, type = 'success') {
 }
 
 // =====================
-// Navbar Behavior
+// Navbar
 // =====================
 (function initNavbar() {
-  const navbar    = document.getElementById('mainNavbar');
-  const hamburger = document.getElementById('hamburger');
-  const navLinks  = document.getElementById('navLinks');
+  const navbar       = document.getElementById('mainNavbar');
+  const hamburger    = document.getElementById('hamburger');
+  const navLinks     = document.getElementById('navLinks');
   const searchToggle = document.getElementById('searchToggle');
   const searchBar    = document.getElementById('searchBar');
   const searchClose  = document.getElementById('searchClose');
@@ -62,25 +86,19 @@ function showToast(message, type = 'success') {
     });
     searchClose?.addEventListener('click', () => searchBar.classList.remove('open'));
   }
-
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.nav-item.dropdown')) {
-      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('force-open'));
-    }
-  });
 })();
 
 // =====================
-// Cart AJAX Operations
+// Cart AJAX
 // =====================
 (function initCartActions() {
-  document.addEventListener('submit', async function(e) {
+  document.addEventListener('submit', async function (e) {
     const form = e.target;
     if (!form.classList.contains('ajax-cart-form')) return;
     e.preventDefault();
 
     const btn = form.querySelector('button[type="submit"]');
-    const originalText = btn?.innerHTML;
+    const originalHTML = btn?.innerHTML;
     if (btn) {
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
       btn.disabled = true;
@@ -90,7 +108,7 @@ function showToast(message, type = 'success') {
       const resp = await fetch(form.action, {
         method: 'POST',
         headers: {
-          'X-CSRFToken': getCookie('csrftoken'),
+          'X-CSRFToken': getCSRFToken(),
           'X-Requested-With': 'XMLHttpRequest',
         },
         body: new FormData(form),
@@ -102,10 +120,10 @@ function showToast(message, type = 'success') {
       } else {
         showToast(data.message || 'Could not add to cart.', 'error');
       }
-    } catch (err) {
+    } catch {
       showToast('Something went wrong. Please try again.', 'error');
     } finally {
-      if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+      if (btn) { btn.innerHTML = originalHTML; btn.disabled = false; }
     }
   });
 
@@ -113,12 +131,12 @@ function showToast(message, type = 'success') {
     let badge = document.getElementById('cartBadge');
     if (count > 0) {
       if (!badge) {
-        const cartBtn = document.querySelector('[href*="/cart/"]');
-        if (cartBtn) {
+        const cartLink = document.querySelector('a[href*="/cart/"]');
+        if (cartLink) {
           badge = document.createElement('span');
           badge.id = 'cartBadge';
           badge.className = 'badge';
-          cartBtn.appendChild(badge);
+          cartLink.appendChild(badge);
         }
       }
       if (badge) badge.textContent = count;
@@ -129,85 +147,95 @@ function showToast(message, type = 'success') {
 })();
 
 // =====================
-// Wishlist AJAX Toggle
-// — uses event delegation so it works on every page
-//   including dynamically loaded cards
+// Cart Page — Update / Remove
+// (يستخدم getCSRFToken بدلاً من getCookie مباشرة)
+// =====================
+async function updateCartItem(itemId, qty) {
+  try {
+    const resp = await fetch(`/cart/update/${itemId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': getCSRFToken(),
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: `quantity=${qty}`,
+    });
+    const data = await resp.json();
+    if (data.success) {
+      if (qty <= 0) {
+        document.getElementById(`cartItem-${itemId}`)?.remove();
+      } else {
+        const qtyEl = document.getElementById(`qty-${itemId}`);
+        if (qtyEl) qtyEl.textContent = qty;
+      }
+      const sub   = document.getElementById('summarySubtotal');
+      const ship  = document.getElementById('summaryShipping');
+      const total = document.getElementById('summaryTotal');
+      const badge = document.getElementById('cartBadge');
+      if (sub)   sub.textContent   = Math.round(data.subtotal) + ' kr';
+      if (ship)  ship.textContent  = Math.round(data.shipping) + ' kr';
+      if (total) total.textContent = Math.round(data.total)    + ' kr';
+      if (badge) badge.textContent = data.total_items;
+      if (data.total_items === 0) location.reload();
+    } else {
+      showToast(data.message || 'Could not update quantity.', 'error');
+    }
+  } catch {
+    showToast('Something went wrong.', 'error');
+  }
+}
+
+// =====================
+// Wishlist AJAX — Event Delegation
 // =====================
 (function initWishlistAjax() {
 
-  // Single delegated listener on the whole document
-  document.addEventListener('submit', async function(e) {
+  // Toggle (add/remove) — من صفحة المنتجات
+  document.addEventListener('submit', async function (e) {
     const form = e.target;
-
-    // Only handle wishlist-form submissions
     if (!form.classList.contains('wishlist-form')) return;
     e.preventDefault();
 
     const btn = form.querySelector('.wishlist-btn');
-    if (btn) btn.style.pointerEvents = 'none'; // prevent double-click
+    if (btn) btn.style.pointerEvents = 'none';
 
     try {
       const resp = await fetch(form.action, {
         method: 'POST',
         headers: {
-          'X-CSRFToken': getCookie('csrftoken'),
+          'X-CSRFToken': getCSRFToken(),
           'X-Requested-With': 'XMLHttpRequest',
         },
       });
-
       if (!resp.ok) throw new Error('Server error');
       const data = await resp.json();
 
-      // ── Update heart button state ──────────────────────
       if (btn) {
-        if (data.in_wishlist) {
-          btn.classList.add('active');
-          btn.title = 'Remove from Wishlist';
-        } else {
-          btn.classList.remove('active');
-          btn.title = 'Add to Wishlist';
-        }
+        btn.classList.toggle('active', data.in_wishlist);
+        btn.title = data.in_wishlist ? 'Remove from Wishlist' : 'Add to Wishlist';
       }
-
-      // ── Update wishlist badge in navbar ────────────────
       updateWishlistBadge(data.count);
 
-      // ── If we are ON the wishlist page, remove the card ─
-      // The wishlist page uses a different form class for removal,
-      // so here we only handle the toggle from product cards.
-      // If the item was removed (not in wishlist) and the page
-      // is the wishlist page, remove the card from DOM.
-      const isWishlistPage = window.location.pathname.includes('/wishlist/');
-      if (isWishlistPage && !data.in_wishlist) {
-        // Find the closest product-card or wishlist item and remove it
+      // إذا كنا في صفحة الـ wishlist وتمت الإزالة — احذف الكارد
+      if (window.location.pathname.includes('/wishlist/') && !data.in_wishlist) {
         const card = form.closest('.product-card') || form.closest('.wishlist-item-card');
-        if (card) {
-          card.style.transition = 'opacity 0.3s, transform 0.3s';
-          card.style.opacity = '0';
-          card.style.transform = 'scale(0.95)';
-          setTimeout(() => {
-            card.remove();
-            checkEmptyWishlist();
-          }, 300);
-        }
+        if (card) animateRemove(card, updateWishlistCount);
       }
 
       showToast(
         data.in_wishlist ? 'Added to wishlist!' : 'Removed from wishlist.',
         'success'
       );
-
-    } catch (err) {
-      // Fallback: normal form submit if AJAX fails
+    } catch {
       form.submit();
     } finally {
       if (btn) btn.style.pointerEvents = '';
     }
   });
 
-  // ── Wishlist remove buttons (on wishlist page) ─────────
-  // These use class="wishlist-remove-form"
-  document.addEventListener('submit', async function(e) {
+  // Remove button في صفحة الـ wishlist
+  document.addEventListener('submit', async function (e) {
     const form = e.target;
     if (!form.classList.contains('wishlist-remove-form')) return;
     e.preventDefault();
@@ -218,51 +246,42 @@ function showToast(message, type = 'success') {
       const resp = await fetch(form.action, {
         method: 'POST',
         headers: {
-          'X-CSRFToken': getCookie('csrftoken'),
+          'X-CSRFToken': getCSRFToken(),
           'X-Requested-With': 'XMLHttpRequest',
         },
       });
-
       if (!resp.ok) throw new Error();
-
-      // Animate card out
-      if (card) {
-        card.style.transition = 'opacity 0.3s, transform 0.3s';
-        card.style.opacity = '0';
-        card.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-          card.remove();
-          checkEmptyWishlist();
-          // Update badge
-          const badge = document.getElementById('wishlistBadge');
-          if (badge) {
-            const current = parseInt(badge.textContent) || 0;
-            const next = current - 1;
-            if (next <= 0) badge.remove();
-            else badge.textContent = next;
-          }
-        }, 300);
-      }
-
+      if (card) animateRemove(card, () => {
+        updateWishlistCount();
+        const badge = document.getElementById('wishlistBadge');
+        if (badge) {
+          const n = (parseInt(badge.textContent) || 1) - 1;
+          n <= 0 ? badge.remove() : (badge.textContent = n);
+        }
+      });
       showToast('Removed from wishlist.', 'success');
-
-    } catch (err) {
-      if (card) form.submit();
+    } catch {
+      form.submit();
     }
   });
+
+  function animateRemove(el, callback) {
+    el.style.transition = 'opacity 0.3s, transform 0.3s';
+    el.style.opacity = '0';
+    el.style.transform = 'scale(0.95)';
+    setTimeout(() => { el.remove(); if (callback) callback(); }, 300);
+  }
 
   function updateWishlistBadge(count) {
     let badge = document.getElementById('wishlistBadge');
     if (count > 0) {
       if (!badge) {
-        // Try to find the wishlist link in the navbar and append badge
-        const wishlistLink = document.querySelector('a[href*="/wishlist/"]');
-        if (wishlistLink) {
+        const link = document.querySelector('a[href*="/wishlist/"]');
+        if (link) {
           badge = document.createElement('span');
           badge.id = 'wishlistBadge';
           badge.className = 'badge';
-          wishlistLink.style.position = 'relative';
-          wishlistLink.appendChild(badge);
+          link.appendChild(badge);
         }
       }
       if (badge) badge.textContent = count;
@@ -271,12 +290,13 @@ function showToast(message, type = 'success') {
     }
   }
 
-  function checkEmptyWishlist() {
-    // If wishlist page has no more cards, show empty state
-    const grid = document.querySelector('.products-grid');
+  function updateWishlistCount() {
+    const grid    = document.getElementById('wishlistGrid');
+    const countEl = document.getElementById('wishlistCount');
     if (!grid) return;
-    const remaining = grid.querySelectorAll('.product-card');
-    if (remaining.length === 0) {
+    const cards = grid.querySelectorAll('.product-card');
+    if (countEl) countEl.textContent = cards.length;
+    if (cards.length === 0) {
       grid.outerHTML = `
         <div class="empty-state">
           <i class="fas fa-heart"></i>
@@ -286,7 +306,6 @@ function showToast(message, type = 'success') {
         </div>`;
     }
   }
-
 })();
 
 // =====================
@@ -294,134 +313,102 @@ function showToast(message, type = 'success') {
 // =====================
 (function initLazyLoad() {
   if (!('IntersectionObserver' in window)) return;
-  const imgObserver = new IntersectionObserver((entries) => {
+  const obs = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const img = entry.target;
-        if (img.dataset.src) {
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
-        }
-        imgObserver.unobserve(img);
+        if (img.dataset.src) { img.src = img.dataset.src; img.removeAttribute('data-src'); }
+        obs.unobserve(img);
       }
     });
   }, { rootMargin: '200px' });
-  document.querySelectorAll('img[data-src]').forEach(img => imgObserver.observe(img));
+  document.querySelectorAll('img[data-src]').forEach(img => obs.observe(img));
 })();
 
 // =====================
 // Auto-dismiss Messages
 // =====================
-(function initMessages() {
-  const container = document.getElementById('messagesContainer');
-  if (container) {
+(function () {
+  const c = document.getElementById('messagesContainer');
+  if (c) {
     setTimeout(() => {
-      container.style.transition = 'opacity 0.5s';
-      container.style.opacity = '0';
-      setTimeout(() => container.remove(), 500);
+      c.style.transition = 'opacity 0.5s';
+      c.style.opacity = '0';
+      setTimeout(() => c.remove(), 500);
     }, 4500);
   }
 })();
 
 // =====================
-// Mobile Menu Styles
+// Mobile Menu
 // =====================
-(function initMobileMenuStyles() {
+(function () {
   const style = document.createElement('style');
   style.textContent = `
-    @media (max-width: 1024px) {
-      .nav-links.mobile-open {
-        display: flex !important;
-        flex-direction: column;
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: white;
-        z-index: 9999;
-        padding: 80px 32px 32px;
-        overflow-y: auto;
-        gap: 0;
-        animation: slideInLeft 0.3s ease;
+    @media (max-width:1024px){
+      .nav-links.mobile-open{
+        display:flex!important;flex-direction:column;
+        position:fixed;top:0;left:0;right:0;bottom:0;
+        background:#fff;z-index:9999;
+        padding:80px 32px 32px;overflow-y:auto;gap:0;
+        animation:slideInLeft .3s ease;
       }
-      @keyframes slideInLeft {
-        from { transform: translateX(-100%); }
-        to   { transform: translateX(0); }
+      @keyframes slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+      .nav-links.mobile-open .nav-link{font-size:22px;padding:16px 0;border-bottom:1px solid #e5e7eb;}
+      .nav-links.mobile-open .dropdown-menu{
+        display:block!important;position:static;
+        box-shadow:none;border:none;border-radius:0;
+        padding-left:16px;background:#f9f9f9;margin-bottom:8px;
       }
-      .nav-links.mobile-open .nav-link {
-        font-size: 22px;
-        padding: 16px 0;
-        border-bottom: 1px solid #e5e7eb;
-      }
-      .nav-links.mobile-open .dropdown-menu {
-        display: block !important;
-        position: static;
-        box-shadow: none;
-        border: none;
-        border-radius: 0;
-        padding-left: 16px;
-        background: #f9f9f9;
-        margin-bottom: 8px;
-      }
-      .nav-links.mobile-open .mega-menu {
-        width: 100%;
-        padding: 16px;
-      }
-      .nav-links.mobile-open .mega-menu-grid {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-    }
-  `;
+      .nav-links.mobile-open .mega-menu{width:100%;padding:16px;}
+      .nav-links.mobile-open .mega-menu-grid{grid-template-columns:1fr;gap:8px;}
+    }`;
   document.head.appendChild(style);
 })();
 
 // =====================
-// Session Activity Ping
+// Session Ping
 // =====================
-(function initSessionPing() {
+(function () {
   let lastPing = Date.now();
-  const PING_INTERVAL = 60000;
   function ping() {
     const now = Date.now();
-    if (now - lastPing > PING_INTERVAL) {
+    if (now - lastPing > 60000) {
       lastPing = now;
       fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' }).catch(() => {});
     }
   }
-  ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(ev => {
-    document.addEventListener(ev, ping, { passive: true });
-  });
+  ['mousemove','keydown','click','scroll','touchstart'].forEach(ev =>
+    document.addEventListener(ev, ping, { passive: true })
+  );
 })();
 
 // =====================
 // Prevent Double Submit
 // =====================
-(function initFormHelpers() {
-  document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function() {
-      const submitBtn = form.querySelector('[type="submit"]');
-      if (submitBtn && !submitBtn.dataset.allowDouble) {
-        setTimeout(() => {
-          submitBtn.disabled = true;
-          if (!submitBtn.classList.contains('no-loading')) {
-            submitBtn.dataset.original = submitBtn.innerHTML;
-            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Please wait...`;
-          }
-        }, 10);
-      }
-    });
+document.querySelectorAll('form').forEach(form => {
+  form.addEventListener('submit', function () {
+    const btn = form.querySelector('[type="submit"]');
+    if (btn && !btn.dataset.allowDouble) {
+      setTimeout(() => {
+        btn.disabled = true;
+        if (!btn.classList.contains('no-loading')) {
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Please wait...';
+        }
+      }, 10);
+    }
   });
-})();
+});
 
 // =====================
 // Smooth Scroll
 // =====================
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function(e) {
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', function (e) {
     const target = document.querySelector(this.getAttribute('href'));
     if (target) {
       e.preventDefault();
-      const top = target.getBoundingClientRect().top + window.pageYOffset - 90;
-      window.scrollTo({ top, behavior: 'smooth' });
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 90, behavior: 'smooth' });
     }
   });
 });

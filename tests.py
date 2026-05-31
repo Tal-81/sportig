@@ -1,8 +1,3 @@
-"""
-Tests for the ecommerce application.
-Covers models, views, and integration tests.
-"""
-
 from decimal import Decimal
 from django.test import TestCase, Client
 from django.urls import reverse
