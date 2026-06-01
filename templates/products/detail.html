@@ -3,7 +3,7 @@
 
 {% block meta_description %}{{ product.meta_description|default:product.description|truncatechars:160 }}{% endblock %}
 {% block meta_keywords %}{{ product.meta_keywords|default:product.name }}{% endblock %}
-{% block og_title %}{{ product.name }} | Sportig{% endblock %}
+{% block og_title %}{{ product.name }} | JD Sports{% endblock %}
 {% block og_description %}{{ product.description|truncatechars:160 }}{% endblock %}
 
 {% block content %}
@@ -22,6 +22,7 @@
 
         <!-- Product Main -->
         <div class="product-detail-layout">
+
             <!-- Gallery -->
             <div class="product-gallery">
                 <div class="gallery-main swiper gallery-swiper">
@@ -63,7 +64,7 @@
 
                 <h1 class="product-detail-title">{{ product.name }}</h1>
 
-                <!-- Rating Summary -->
+                <!-- Rating -->
                 <div class="product-detail-rating">
                     <div class="stars">
                         {% with avg=product.average_rating %}
@@ -89,7 +90,7 @@
 
                 <div class="product-divider"></div>
 
-                <!-- Variant Selector -->
+                <!-- Add to Cart Form (Variants) -->
                 {% if product.variants.exists %}
                 <form method="post" action="{% url 'cart:add' %}" id="addToCartForm">
                     {% csrf_token %}
@@ -97,15 +98,16 @@
                     <input type="hidden" name="quantity" value="1" id="quantityInput">
                     <input type="hidden" name="variant_id" id="selectedVariant">
 
-                    <!-- Color Selector -->
+                    <!-- Color -->
                     {% if colors %}
                     <div class="variant-group">
                         <label class="variant-label">Color: <strong id="selectedColorName">Select</strong></label>
                         <div class="color-options">
                             {% for c in colors %}
-                            <button type="button" class="color-swatch"
+                            <button type="button"
+                                    class="color-swatch"
                                     data-color="{{ c.color }}"
-                                    style="background-color: {{ c.hex }}"
+                                    style="background-color: {{ c.hex }};"
                                     title="{{ c.color }}"
                                     onclick="selectColor(this, '{{ c.color }}')">
                             </button>
@@ -114,7 +116,7 @@
                     </div>
                     {% endif %}
 
-                    <!-- Size Selector -->
+                    <!-- Size -->
                     <div class="variant-group" id="sizeGroup" style="display:none;">
                         <label class="variant-label">Size: <strong id="selectedSizeName">Select</strong></label>
                         <div class="size-options" id="sizeOptions"></div>
@@ -134,39 +136,56 @@
                         </div>
                     </div>
 
-                    <!-- Actions -->
+                    <!-- ══ Product Actions ══════════════════════════ -->
                     <div class="product-actions">
+                        <!-- Add to Cart -->
                         <button type="submit" class="btn-add-cart" id="addCartBtn" disabled>
                             <i class="fas fa-shopping-bag"></i> Add to Cart
                         </button>
+
+                        <!-- ══ Wishlist — form مستقل تماماً عن Cart ══ -->
                         {% if user.is_authenticated %}
-                        <form method="post" action="{% url 'wishlist:toggle' product.id %}" class="inline-form">
+                        <form method="post"
+                              action="{% url 'wishlist:toggle' product.id %}"
+                              class="wishlist-form"
+                              id="productWishlistForm">
                             {% csrf_token %}
-                            <button type="submit" class="btn-wishlist {% if product.id in wishlist_product_ids %}active{% endif %}">
+                            <button type="submit"
+                                    class="btn-wishlist {% if product.id in wishlist_product_ids %}active{% endif %}"
+                                    title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
                                 <i class="fas fa-heart"></i>
                             </button>
                         </form>
                         {% else %}
-                        <a href="{% url 'users:login' %}" class="btn-wishlist" title="Login to save">
+                        <a href="{% url 'users:login' %}?next={{ request.path }}"
+                           class="btn-wishlist"
+                           title="Login to save to wishlist">
                             <i class="fas fa-heart"></i>
                         </a>
                         {% endif %}
                     </div>
                 </form>
+
                 {% else %}
                 <!-- Simple product (no variants) -->
-                <form method="post" action="{% url 'cart:add' %}">
+                <form method="post" action="{% url 'cart:add' %}" id="addToCartFormSimple">
                     {% csrf_token %}
                     <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input type="hidden" name="quantity" id="quantityInput" value="1">
+
                     <div class="variant-group">
                         <label class="variant-label">Quantity</label>
                         <div class="quantity-selector">
-                            <button type="button" class="qty-btn" onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
+                            <button type="button" class="qty-btn" onclick="changeQty(-1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
                             <span class="qty-value" id="qtyDisplay">1</span>
-                            <button type="button" class="qty-btn" onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
+                            <button type="button" class="qty-btn" onclick="changeQty(1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
-                        <input type="hidden" name="quantity" id="quantityInput" value="1">
                     </div>
+
                     <div class="product-actions">
                         {% if product.is_in_stock %}
                         <button type="submit" class="btn-add-cart">
@@ -175,13 +194,26 @@
                         {% else %}
                         <button class="btn-add-cart disabled" disabled>Out of Stock</button>
                         {% endif %}
+
+                        <!-- ══ Wishlist — مستقل تماماً ══ -->
                         {% if user.is_authenticated %}
-                        <form method="post" action="{% url 'wishlist:toggle' product.id %}" style="display:inline;">
+                        <form method="post"
+                              action="{% url 'wishlist:toggle' product.id %}"
+                              class="wishlist-form"
+                              id="productWishlistForm">
                             {% csrf_token %}
-                            <button type="submit" class="btn-wishlist {% if product.id in wishlist_product_ids %}active{% endif %}">
+                            <button type="submit"
+                                    class="btn-wishlist {% if product.id in wishlist_product_ids %}active{% endif %}"
+                                    title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
                                 <i class="fas fa-heart"></i>
                             </button>
                         </form>
+                        {% else %}
+                        <a href="{% url 'users:login' %}?next={{ request.path }}"
+                           class="btn-wishlist"
+                           title="Login to save">
+                            <i class="fas fa-heart"></i>
+                        </a>
                         {% endif %}
                     </div>
                 </form>
@@ -196,7 +228,7 @@
                     <div class="meta-row"><i class="fas fa-venus-mars"></i> <span>{{ product.get_gender_display }}</span></div>
                 </div>
 
-                <!-- Description Tabs -->
+                <!-- Tabs -->
                 <div class="product-tabs">
                     <div class="tab-buttons">
                         <button class="tab-btn active" onclick="openTab(this,'desc')">Description</button>
@@ -221,47 +253,76 @@
         <section class="reviews-section" id="reviews" data-aos="fade-up">
             <div class="section-header">
                 <div class="section-label">What Customers Say</div>
-                <h2 class="section-title">Reviews & Ratings</h2>
+                <h2 class="section-title">
+                    Reviews & Ratings
+                    {% if product.review_count > 0 %}
+                    <span style="font-size:16px;font-weight:400;color:#6b7280;">
+                        ({{ product.review_count }} review{{ product.review_count|pluralize }})
+                    </span>
+                    {% endif %}
+                </h2>
             </div>
 
-            {% if can_review and not user_review %}
-            <div class="review-form-card">
-                <h3>Write a Review</h3>
-                <form method="post" action="{% url 'reviews:add' product.slug %}">
-                    {% csrf_token %}
-                    <div class="star-rating-input">
-                        <label>Rating:</label>
-                        <div class="star-inputs">
-                            {% for i in "54321" %}
-                            <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}">
-                            <label for="star{{ i }}"><i class="fas fa-star"></i></label>
-                            {% endfor %}
+            {% if user.is_authenticated %}
+                {% if can_review and not user_review %}
+                <div class="review-form-card">
+                    <h3>Write a Review <span style="font-size:13px;font-weight:400;color:#6b7280;">(Optional)</span></h3>
+                    <form method="post" action="{% url 'reviews:add' product.slug %}">
+                        {% csrf_token %}
+                        <div class="star-rating-input">
+                            <label>Your Rating:</label>
+                            <div class="star-inputs">
+                                {% for i in "54321" %}
+                                <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}"
+                                       {% if forloop.first %}checked{% endif %}>
+                                <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+                                {% endfor %}
+                            </div>
                         </div>
+                        <textarea name="comment" class="review-textarea"
+                                  placeholder="Share your experience with this product..."
+                                  required rows="4"></textarea>
+                        <button type="submit" class="btn-primary" style="margin-top:8px;">
+                            <i class="fas fa-paper-plane"></i> Submit Review
+                        </button>
+                    </form>
+                </div>
+                {% elif user_review %}
+                <div class="review-form-card" style="border-left:3px solid #16a34a;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                        <h3 style="margin:0;">Your Review</h3>
+                        <form method="post" action="{% url 'reviews:delete' user_review.id %}"
+                              onsubmit="return confirm('Delete your review?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-text-danger">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </form>
                     </div>
-                    <textarea name="comment" class="review-textarea" placeholder="Share your experience..." required rows="4"></textarea>
-                    <button type="submit" class="btn-primary">Submit Review</button>
-                </form>
-            </div>
-            {% elif user_review %}
-            <div class="alert-info">
-                You have already reviewed this product.
-                <form method="post" action="{% url 'reviews:delete' user_review.id %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-text-danger">Delete my review</button>
-                </form>
-            </div>
-            {% elif user.is_authenticated and not can_review %}
-            <div class="alert-info">
-                <i class="fas fa-info-circle"></i> Only verified buyers can leave reviews.
-            </div>
+                    <div class="stars" style="margin-bottom:8px;">
+                        {% for i in "12345" %}
+                        <i class="fas fa-star"
+                           style="color:{% if forloop.counter <= user_review.rating %}#f59e0b{% else %}#e5e7eb{% endif %};font-size:16px;"></i>
+                        {% endfor %}
+                    </div>
+                    <p style="font-size:14px;color:#444;">{{ user_review.comment }}</p>
+                    <small style="color:#9ca3af;">{{ user_review.created_at|date:"d M Y" }}</small>
+                </div>
+                {% elif not can_review %}
+                <div class="alert-info">
+                    <i class="fas fa-shopping-bag"></i>
+                    Only verified buyers can leave reviews.
+                </div>
+                {% endif %}
             {% else %}
             <div class="alert-info">
-                <a href="{% url 'users:login' %}">Login</a> and purchase this product to leave a review.
+                <a href="{% url 'users:login' %}?next={{ request.path }}">Login</a>
+                and purchase this product to leave a review.
             </div>
             {% endif %}
 
             <!-- Reviews List -->
-            <div class="reviews-list">
+            <div class="reviews-list" style="margin-top:32px;">
                 {% for review in product.reviews.all %}
                 <div class="review-card">
                     <div class="review-header">
@@ -271,7 +332,9 @@
                             </div>
                             <div>
                                 <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
-                                <small>Verified Buyer</small>
+                                <small style="display:block;color:#16a34a;font-size:11px;">
+                                    <i class="fas fa-check-circle"></i> Verified Buyer
+                                </small>
                             </div>
                         </div>
                         <div class="review-meta">
@@ -280,15 +343,17 @@
                                 <i class="fas fa-star {% if forloop.counter <= review.rating %}filled{% endif %}"></i>
                                 {% endfor %}
                             </div>
-                            <time>{{ review.created_at|date:"d M Y" }}</time>
+                            <time style="font-size:12px;color:#9ca3af;display:block;margin-top:4px;">
+                                {{ review.created_at|date:"d M Y" }}
+                            </time>
                         </div>
                     </div>
                     <p class="review-comment">{{ review.comment }}</p>
                 </div>
                 {% empty %}
                 <div class="empty-state small">
-                    <i class="fas fa-star"></i>
-                    <p>No reviews yet. Be the first to review this product!</p>
+                    <i class="fas fa-star" style="color:#e5e7eb;"></i>
+                    <p>No reviews yet. Be the first to share your experience!</p>
                 </div>
                 {% endfor %}
             </div>
@@ -321,7 +386,7 @@
 
 {% block extra_js %}
 <script>
-// Gallery Swiper with thumbnails
+// Gallery Swiper
 const thumbsSwiper = new Swiper('.thumbs-swiper', {
     slidesPerView: 4,
     spaceBetween: 8,
@@ -329,15 +394,17 @@ const thumbsSwiper = new Swiper('.thumbs-swiper', {
 });
 new Swiper('.gallery-swiper', {
     thumbs: { swiper: thumbsSwiper },
-    loop: false,
 });
 
-// Products Related Swiper
+// Related products swiper
 document.querySelectorAll('.products-swiper').forEach(el => {
     new Swiper(el, {
         slidesPerView: 2,
         spaceBetween: 20,
-        navigation: { nextEl: el.querySelector('.prod-next'), prevEl: el.querySelector('.prod-prev') },
+        navigation: {
+            nextEl: el.querySelector('.prod-next'),
+            prevEl: el.querySelector('.prod-prev'),
+        },
         breakpoints: { 768: { slidesPerView: 3 }, 1024: { slidesPerView: 4 } },
     });
 });
@@ -350,21 +417,17 @@ function changeQty(delta) {
     document.querySelectorAll('#quantityInput').forEach(el => el.value = qty);
 }
 
-// Color/size selection
-let selectedColor = null;
-
+// Color selection → fetch sizes
 function selectColor(btn, color) {
     document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
     btn.classList.add('selected');
-    selectedColor = color;
     document.getElementById('selectedColorName').textContent = color;
 
-    // Fetch sizes for this color
     const productId = document.querySelector('[name="product_id"]').value;
     fetch(`/products/api/${productId}/variants/?color=${encodeURIComponent(color)}`)
         .then(r => r.json())
         .then(data => {
-            const sizeGroup = document.getElementById('sizeGroup');
+            const sizeGroup   = document.getElementById('sizeGroup');
             const sizeOptions = document.getElementById('sizeOptions');
             sizeGroup.style.display = 'block';
             sizeOptions.innerHTML = '';
@@ -373,13 +436,11 @@ function selectColor(btn, color) {
             document.getElementById('addCartBtn').disabled = true;
 
             data.variants.forEach(v => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'size-btn';
-                btn.textContent = v.size;
-                btn.dataset.variantId = v.id;
-                if (v.stock_quantity === 0) btn.classList.add('out-of-stock');
-                btn.addEventListener('click', function() {
+                const sizeBtn = document.createElement('button');
+                sizeBtn.type = 'button';
+                sizeBtn.className = 'size-btn' + (v.stock_quantity === 0 ? ' out-of-stock' : '');
+                sizeBtn.textContent = v.size;
+                sizeBtn.addEventListener('click', function () {
                     if (this.classList.contains('out-of-stock')) return;
                     document.querySelectorAll('.size-btn').forEach(s => s.classList.remove('selected'));
                     this.classList.add('selected');
@@ -387,7 +448,7 @@ function selectColor(btn, color) {
                     document.getElementById('selectedVariant').value = v.id;
                     document.getElementById('addCartBtn').disabled = false;
                 });
-                sizeOptions.appendChild(btn);
+                sizeOptions.appendChild(sizeBtn);
             });
         });
 }
@@ -400,11 +461,13 @@ function openTab(btn, id) {
     document.getElementById('tab-' + id).classList.add('active');
 }
 
-// Add to cart with AJAX feedback
-document.getElementById('addToCartForm')?.addEventListener('submit', async function(e) {
-    const variantId = document.getElementById('selectedVariant').value;
-    if (!variantId) { e.preventDefault(); alert('Please select color and size.'); return; }
-    // Allow normal form submit
+// Validate cart form — يجب اختيار variant قبل إضافة للسلة
+document.getElementById('addToCartForm')?.addEventListener('submit', function (e) {
+    const variantId = document.getElementById('selectedVariant')?.value;
+    if (!variantId) {
+        e.preventDefault();
+        showToast('Please select a color and size first.', 'error');
+    }
 });
 </script>
 {% endblock %}

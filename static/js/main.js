@@ -1,7 +1,11 @@
+/* ===================================================
+   JD Sports Clone - Main JavaScript
+   =================================================== */
+
 'use strict';
 
 // =====================
-// CSRF Token Helper
+// CSRF Token
 // =====================
 function getCookie(name) {
   let cookieValue = null;
@@ -18,21 +22,19 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// read the token from meta tag (priority) or cookie or hidden input
 function getCSRFToken() {
   const meta = document.querySelector('meta[name="csrf-token"]');
-  if (meta && meta.getAttribute('content')) {
-    return meta.getAttribute('content');
-  }
+  if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
   const fromCookie = getCookie('csrftoken');
   if (fromCookie) return fromCookie;
-
   const hidden = document.querySelector('input[name="csrfmiddlewaretoken"]');
   if (hidden) return hidden.value;
-
   return '';
 }
 
+// =====================
+// Toast Notifications
+// =====================
 function showToast(message, type = 'success') {
   let container = document.getElementById('messagesContainer');
   if (!container) {
@@ -99,18 +101,12 @@ function showToast(message, type = 'success') {
 
     const btn = form.querySelector('button[type="submit"]');
     const originalHTML = btn?.innerHTML;
-    if (btn) {
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      btn.disabled = true;
-    }
+    if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
 
     try {
       const resp = await fetch(form.action, {
         method: 'POST',
-        headers: {
-          'X-CSRFToken': getCSRFToken(),
-          'X-Requested-With': 'XMLHttpRequest',
-        },
+        headers: { 'X-CSRFToken': getCSRFToken(), 'X-Requested-With': 'XMLHttpRequest' },
         body: new FormData(form),
       });
       const data = await resp.json();
@@ -120,35 +116,24 @@ function showToast(message, type = 'success') {
       } else {
         showToast(data.message || 'Could not add to cart.', 'error');
       }
-    } catch {
-      showToast('Something went wrong. Please try again.', 'error');
-    } finally {
-      if (btn) { btn.innerHTML = originalHTML; btn.disabled = false; }
-    }
+    } catch { showToast('Something went wrong.', 'error'); }
+    finally { if (btn) { btn.innerHTML = originalHTML; btn.disabled = false; } }
   });
 
   function updateCartBadge(count) {
     let badge = document.getElementById('cartBadge');
     if (count > 0) {
       if (!badge) {
-        const cartLink = document.querySelector('a[href*="/cart/"]');
-        if (cartLink) {
-          badge = document.createElement('span');
-          badge.id = 'cartBadge';
-          badge.className = 'badge';
-          cartLink.appendChild(badge);
-        }
+        const link = document.querySelector('a[href*="/cart/"]');
+        if (link) { badge = document.createElement('span'); badge.id = 'cartBadge'; badge.className = 'badge'; link.appendChild(badge); }
       }
       if (badge) badge.textContent = count;
-    } else if (badge) {
-      badge.remove();
-    }
+    } else if (badge) badge.remove();
   }
 })();
 
 // =====================
-// Cart Page — Update / Remove
-// (يستخدم getCSRFToken بدلاً من getCookie مباشرة)
+// Cart Page — updateCartItem (global)
 // =====================
 async function updateCartItem(itemId, qty) {
   try {
@@ -169,29 +154,25 @@ async function updateCartItem(itemId, qty) {
         const qtyEl = document.getElementById(`qty-${itemId}`);
         if (qtyEl) qtyEl.textContent = qty;
       }
-      const sub   = document.getElementById('summarySubtotal');
-      const ship  = document.getElementById('summaryShipping');
-      const total = document.getElementById('summaryTotal');
-      const badge = document.getElementById('cartBadge');
-      if (sub)   sub.textContent   = Math.round(data.subtotal) + ' kr';
-      if (ship)  ship.textContent  = Math.round(data.shipping) + ' kr';
-      if (total) total.textContent = Math.round(data.total)    + ' kr';
-      if (badge) badge.textContent = data.total_items;
+      const el = (id) => document.getElementById(id);
+      if (el('summarySubtotal')) el('summarySubtotal').textContent = Math.round(data.subtotal) + ' kr';
+      if (el('summaryShipping')) el('summaryShipping').textContent = Math.round(data.shipping) + ' kr';
+      if (el('summaryTotal'))    el('summaryTotal').textContent    = Math.round(data.total)    + ' kr';
+      if (el('cartBadge'))       el('cartBadge').textContent       = data.total_items;
       if (data.total_items === 0) location.reload();
     } else {
       showToast(data.message || 'Could not update quantity.', 'error');
     }
-  } catch {
-    showToast('Something went wrong.', 'error');
-  }
+  } catch { showToast('Something went wrong.', 'error'); }
 }
 
 // =====================
-// Wishlist AJAX — Event Delegation
+// Wishlist AJAX
+// الأساسي: event delegation على document
+// يعمل على كل الصفحات: detail, list, wishlist
 // =====================
 (function initWishlistAjax() {
 
-  // Toggle (add/remove) — من صفحة المنتجات
   document.addEventListener('submit', async function (e) {
     const form = e.target;
     if (!form.classList.contains('wishlist-form')) return;
@@ -206,70 +187,67 @@ async function updateCartItem(itemId, qty) {
         headers: {
           'X-CSRFToken': getCSRFToken(),
           'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
         },
       });
-      if (!resp.ok) throw new Error('Server error');
+
+      // إذا رجع redirect (مستخدم غير مسجّل) اذهب لصفحة login
+      if (resp.redirected) {
+        window.location.href = resp.url;
+        return;
+      }
+
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
 
-      if (btn) {
-        btn.classList.toggle('active', data.in_wishlist);
-        btn.title = data.in_wishlist ? 'Remove from Wishlist' : 'Add to Wishlist';
+      // ── تحديث زر القلب ────────────────────────────
+      // كل أزرار القلب لنفس المنتج في الصفحة
+      const productId = form.action.match(/\/wishlist\/toggle\/(\d+)\//)?.[1];
+      if (productId) {
+        document.querySelectorAll(
+          `form[action*="/wishlist/toggle/${productId}/"] .wishlist-btn`
+        ).forEach(heartBtn => {
+          heartBtn.classList.toggle('active', data.in_wishlist);
+          heartBtn.title = data.in_wishlist ? 'Remove from Wishlist' : 'Add to Wishlist';
+        });
       }
+
+      // ── تحديث الـ badge في الـ navbar ─────────────
       updateWishlistBadge(data.count);
 
-      // إذا كنا في صفحة الـ wishlist وتمت الإزالة — احذف الكارد
-      if (window.location.pathname.includes('/wishlist/') && !data.in_wishlist) {
+      // ── إذا كنا في صفحة الـ wishlist وتمت الإزالة ─
+      if (!data.in_wishlist && window.location.pathname.startsWith('/wishlist/')) {
         const card = form.closest('.product-card') || form.closest('.wishlist-item-card');
-        if (card) animateRemove(card, updateWishlistCount);
+        if (card) {
+          animateRemove(card, () => {
+            refreshWishlistPage(data.count);
+          });
+        }
       }
 
       showToast(
         data.in_wishlist ? 'Added to wishlist!' : 'Removed from wishlist.',
         'success'
       );
-    } catch {
+
+    } catch (err) {
+      console.error('Wishlist error:', err);
+      // Fallback: submit عادي
       form.submit();
     } finally {
       if (btn) btn.style.pointerEvents = '';
     }
   });
 
-  // Remove button في صفحة الـ wishlist
-  document.addEventListener('submit', async function (e) {
-    const form = e.target;
-    if (!form.classList.contains('wishlist-remove-form')) return;
-    e.preventDefault();
-
-    const card = form.closest('.product-card') || form.closest('.wishlist-item-card');
-
-    try {
-      const resp = await fetch(form.action, {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': getCSRFToken(),
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      });
-      if (!resp.ok) throw new Error();
-      if (card) animateRemove(card, () => {
-        updateWishlistCount();
-        const badge = document.getElementById('wishlistBadge');
-        if (badge) {
-          const n = (parseInt(badge.textContent) || 1) - 1;
-          n <= 0 ? badge.remove() : (badge.textContent = n);
-        }
-      });
-      showToast('Removed from wishlist.', 'success');
-    } catch {
-      form.submit();
-    }
-  });
-
+  // ─────────────────────────────────────────────────
   function animateRemove(el, callback) {
     el.style.transition = 'opacity 0.3s, transform 0.3s';
-    el.style.opacity = '0';
-    el.style.transform = 'scale(0.95)';
-    setTimeout(() => { el.remove(); if (callback) callback(); }, 300);
+    el.style.opacity    = '0';
+    el.style.transform  = 'scale(0.92)';
+    setTimeout(() => {
+      el.remove();
+      if (callback) callback();
+    }, 320);
   }
 
   function updateWishlistBadge(count) {
@@ -281,6 +259,7 @@ async function updateCartItem(itemId, qty) {
           badge = document.createElement('span');
           badge.id = 'wishlistBadge';
           badge.className = 'badge';
+          link.style.position = 'relative';
           link.appendChild(badge);
         }
       }
@@ -290,13 +269,20 @@ async function updateCartItem(itemId, qty) {
     }
   }
 
-  function updateWishlistCount() {
-    const grid    = document.getElementById('wishlistGrid');
+  function refreshWishlistPage(count) {
+    // حدّث عداد الصفحة
     const countEl = document.getElementById('wishlistCount');
+    if (countEl) countEl.textContent = count;
+
+    // حدّث عداد الـ modal
+    const mc = document.getElementById('modalCount');
+    if (mc) mc.textContent = count;
+
+    // إذا فرغت القائمة — اعرض empty state
+    const grid = document.getElementById('wishlistGrid');
     if (!grid) return;
-    const cards = grid.querySelectorAll('.product-card');
-    if (countEl) countEl.textContent = cards.length;
-    if (cards.length === 0) {
+    const remaining = grid.querySelectorAll('.product-card').length;
+    if (remaining === 0) {
       grid.outerHTML = `
         <div class="empty-state">
           <i class="fas fa-heart"></i>
@@ -304,14 +290,18 @@ async function updateCartItem(itemId, qty) {
           <p>Save items you love to your wishlist and find them here anytime.</p>
           <a href="/products/" class="btn-primary">Discover Products</a>
         </div>`;
+      // أخفِ زر Clear
+      const clearBtn = document.getElementById('clearWishlistBtn');
+      if (clearBtn) clearBtn.style.display = 'none';
     }
   }
+
 })();
 
 // =====================
 // Lazy Image Loading
 // =====================
-(function initLazyLoad() {
+(function () {
   if (!('IntersectionObserver' in window)) return;
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -343,27 +333,20 @@ async function updateCartItem(itemId, qty) {
 // Mobile Menu
 // =====================
 (function () {
-  const style = document.createElement('style');
-  style.textContent = `
+  const s = document.createElement('style');
+  s.textContent = `
     @media (max-width:1024px){
-      .nav-links.mobile-open{
-        display:flex!important;flex-direction:column;
-        position:fixed;top:0;left:0;right:0;bottom:0;
-        background:#fff;z-index:9999;
-        padding:80px 32px 32px;overflow-y:auto;gap:0;
-        animation:slideInLeft .3s ease;
-      }
+      .nav-links.mobile-open{display:flex!important;flex-direction:column;position:fixed;
+        top:0;left:0;right:0;bottom:0;background:#fff;z-index:9999;
+        padding:80px 32px 32px;overflow-y:auto;gap:0;animation:slideInLeft .3s ease;}
       @keyframes slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}
       .nav-links.mobile-open .nav-link{font-size:22px;padding:16px 0;border-bottom:1px solid #e5e7eb;}
-      .nav-links.mobile-open .dropdown-menu{
-        display:block!important;position:static;
-        box-shadow:none;border:none;border-radius:0;
-        padding-left:16px;background:#f9f9f9;margin-bottom:8px;
-      }
+      .nav-links.mobile-open .dropdown-menu{display:block!important;position:static;
+        box-shadow:none;border:none;border-radius:0;padding-left:16px;background:#f9f9f9;}
       .nav-links.mobile-open .mega-menu{width:100%;padding:16px;}
       .nav-links.mobile-open .mega-menu-grid{grid-template-columns:1fr;gap:8px;}
     }`;
-  document.head.appendChild(style);
+  document.head.appendChild(s);
 })();
 
 // =====================
@@ -372,9 +355,8 @@ async function updateCartItem(itemId, qty) {
 (function () {
   let lastPing = Date.now();
   function ping() {
-    const now = Date.now();
-    if (now - lastPing > 60000) {
-      lastPing = now;
+    if (Date.now() - lastPing > 60000) {
+      lastPing = Date.now();
       fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' }).catch(() => {});
     }
   }
@@ -408,7 +390,10 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     const target = document.querySelector(this.getAttribute('href'));
     if (target) {
       e.preventDefault();
-      window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 90, behavior: 'smooth' });
+      window.scrollTo({
+        top: target.getBoundingClientRect().top + window.pageYOffset - 90,
+        behavior: 'smooth',
+      });
     }
   });
 });
