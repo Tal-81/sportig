@@ -368,6 +368,7 @@ async function updateCartItem(itemId, qty) {
 // =====================
 // Prevent Double Submit
 // =====================
+
 document.querySelectorAll('form').forEach(form => {
   form.addEventListener('submit', function () {
     const btn = form.querySelector('[type="submit"]');

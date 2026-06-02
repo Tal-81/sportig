@@ -141,28 +141,7 @@
                         <!-- Add to Cart -->
                         <button type="submit" class="btn-add-cart" id="addCartBtn" disabled>
                             <i class="fas fa-shopping-bag"></i> Add to Cart
-                        </button>
-
-                        <!-- ══ Wishlist — form مستقل تماماً عن Cart ══ -->
-                        {% if user.is_authenticated %}
-                        <form method="post"
-                              action="{% url 'wishlist:toggle' product.id %}"
-                              class="wishlist-form"
-                              id="productWishlistForm">
-                            {% csrf_token %}
-                            <button type="submit"
-                                    class="btn-wishlist {% if product.id in wishlist_product_ids %}active{% endif %}"
-                                    title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                        </form>
-                        {% else %}
-                        <a href="{% url 'users:login' %}?next={{ request.path }}"
-                           class="btn-wishlist"
-                           title="Login to save to wishlist">
-                            <i class="fas fa-heart"></i>
-                        </a>
-                        {% endif %}
+                        </button>                        
                     </div>
                 </form>
 
@@ -195,7 +174,12 @@
                         <button class="btn-add-cart disabled" disabled>Out of Stock</button>
                         {% endif %}
 
-                        <!-- ══ Wishlist — مستقل تماماً ══ -->
+                        <!-- ══ Wishlist ══ -->
+
+                    </div>
+                </form>
+                {% endif %}
+
                         {% if user.is_authenticated %}
                         <form method="post"
                               action="{% url 'wishlist:toggle' product.id %}"
@@ -204,7 +188,8 @@
                             {% csrf_token %}
                             <button type="submit"
                                     class="btn-wishlist {% if product.id in wishlist_product_ids %}active{% endif %}"
-                                    title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
+                                    title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
+                                    data-allow-double="true">
                                 <i class="fas fa-heart"></i>
                             </button>
                         </form>
@@ -215,9 +200,6 @@
                             <i class="fas fa-heart"></i>
                         </a>
                         {% endif %}
-                    </div>
-                </form>
-                {% endif %}
 
                 <!-- Product Meta -->
                 <div class="product-meta-info">
