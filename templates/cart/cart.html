@@ -53,9 +53,9 @@
                         <div class="cart-item-bottom">
 
                             <!-- ── Quantity Controls ──────────────────────
-                                 data-item-id  : ID العنصر في السلة
-                                 data-max-stock: الحد الأقصى للمخزون
-                                 لا يوجد onclick — JS يقرأ الكمية من الـ DOM
+                                 data-item-id  : product ID in the cart  
+                                 data-max-stock: maximum stock quantity
+                                 no onclick — JS reads quantity from the DOM
                             ─────────────────────────────────────────────── -->
                             <div class="cart-qty-control"
                                  data-item-id="{{ item.id }}"
@@ -210,7 +210,7 @@
 
 {% block extra_css %}
 <style>
-/* أزرار الكمية المعطّلة */
+/*   disabled quantity buttons  */
 .qty-btn-sm:disabled {
     opacity: 0.3;
     cursor: not-allowed;
@@ -223,8 +223,8 @@
 <script>
 /* ============================================================
    Cart Quantity — Event Delegation
-   يقرأ الكمية من الـ DOM وقت الضغط (ديناميكي)
-   وليس من onclick ثابت في الـ HTML
+   reads the quantity from the DOM when clicked (dynamic)
+   instead of using a static onclick in the HTML
    ============================================================ */
 (function () {
 
@@ -240,13 +240,13 @@
         const qtySpan  = document.getElementById('qty-' + itemId);
         if (!qtySpan) return;
 
-        // اقرأ الكمية الحالية من الـ DOM الآن — وليس من HTML ثابت
+        // read the current quantity from the DOM now — not from static HTML
         const currentQty = parseInt(qtySpan.textContent.trim()) || 1;
         const newQty     = btn.classList.contains('qty-btn-min')
                            ? currentQty - 1
                            : currentQty + 1;
 
-        // ── تحقق محلي قبل الإرسال ──────────────────────────
+        // ── local validation before submission ──────────────────────────
         if (newQty < 1) {
             showToast('Minimum quantity is 1.', 'error');
             return;
@@ -256,7 +256,7 @@
             return;
         }
 
-        // ── تعطيل الأزرار أثناء الانتظار ───────────────────
+        // ── disable buttons while waiting ───────────────────
         const btnMin = control.querySelector('.qty-btn-min');
         const btnPls = control.querySelector('.qty-btn-plus');
         if (btnMin) btnMin.disabled = true;
@@ -277,28 +277,28 @@
             const data = await resp.json();
 
             if (data.success) {
-                // حدّث العدد
+                // update quantity
                 qtySpan.textContent = newQty;
 
-                // حدّث line total
+                // update line total
                 const ltEl = document.getElementById('lineTotal-' + itemId);
                 if (ltEl && data.line_total != null)
                     ltEl.textContent = fmt(data.line_total);
 
-                // حدّث الـ summary
+                // update summary
                 const g = (id) => document.getElementById(id);
                 if (g('summarySubtotal')) g('summarySubtotal').textContent = fmt(data.subtotal);
                 if (g('summaryShipping')) g('summaryShipping').textContent = fmt(data.shipping);
                 if (g('summaryTotal'))    g('summaryTotal').textContent    = fmt(data.total);
 
-                // حدّث badge
+                // update badge
                 const badge = document.getElementById('cartBadge');
                 if (badge) badge.textContent = data.total_items;
 
                 if (data.total_items === 0) location.reload();
 
             } else {
-                // فشل — أرجع الكمية
+                // Failed — return to original quantity
                 qtySpan.textContent = currentQty;
                 showToast(data.message || 'Could not update.', 'error');
             }
@@ -307,7 +307,7 @@
             qtySpan.textContent = currentQty;
             showToast('Something went wrong.', 'error');
         } finally {
-            // أعد تفعيل الأزرار بناءً على الكمية الحقيقية الحالية
+            // return to enabling buttons based on the actual current quantity
             const finalQty = parseInt(qtySpan.textContent.trim()) || 1;
             if (btnMin) btnMin.disabled = (finalQty <= 1);
             if (btnPls) btnPls.disabled = (finalQty >= maxStock);

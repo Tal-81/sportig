@@ -197,6 +197,7 @@ def stripe_webhook(request):
 def _fulfill_order(order):
     """Fulfill order: update status, reduce stock, update product sales count."""
     if order.payment_status == 'completed':
+        CartService.clear_cart()
         return  # Already fulfilled
 
     order.payment_status = 'completed'

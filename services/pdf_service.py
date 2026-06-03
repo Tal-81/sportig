@@ -14,12 +14,12 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 #  BRANDING CONSTANTS — edit these to customize your invoice
 # ============================================================
 
-COMPANY_NAME      = 'JD SPORTS'
+COMPANY_NAME      = 'SPportig'
 COMPANY_TAGLINE   = 'Premium Sports & Lifestyle'
-COMPANY_EMAIL     = 'support@jdsports-clone.com'
-COMPANY_WEBSITE   = 'www.jdsports-clone.com'
+COMPANY_EMAIL     = 'support@sportigsports-clone.com'
+COMPANY_WEBSITE   = 'www.sportigsports.com'
 COMPANY_PHONE     = '+46 8 123 456 78'
-COMPANY_ADDRESS   = 'Drottninggatan 1, 111 51 Stockholm, Sweden'
+COMPANY_ADDRESS   = 'Drottningsgatan 1, 111 51 Stockholm, Sweden'
 
 # VAT / Org number shown in footer (leave empty to hide)
 COMPANY_VAT_NO    = 'VAT No: SE556123456701'
@@ -30,7 +30,7 @@ PRIMARY_COLOR     = '#111111'
 
 # Footer message
 FOOTER_TEXT = (
-    'Thank you for shopping with JD Sports!  |  '
+    'Thank you for shopping with Sportig!  |  '
     'Delivery: 3–5 business days  |  '
     'Returns accepted within 30 days'
 )
