@@ -8,55 +8,101 @@
             <a href="{% url 'core:home' %}">Home</a><span>/</span><span>Shopping Cart</span>
         </nav>
 
-        <h1 class="page-title">Shopping Cart
-            <span class="cart-count-badge">{{ cart.total_items }} item{{ cart.total_items|pluralize }}</span>
+        <h1 class="page-title">
+            Shopping Cart
+            <span class="cart-count-badge">
+                {{ cart.total_items }} item{{ cart.total_items|pluralize }}
+            </span>
         </h1>
 
         {% if cart.items %}
         <div class="cart-layout">
-            <!-- Cart Items -->
+
+            <!-- ── Cart Items ────────────────────────────── -->
             <div class="cart-items-wrap">
                 {% for item in cart.items %}
+
                 <div class="cart-item" id="cartItem-{{ item.id }}">
+
+                    <!-- Image -->
                     <div class="cart-item-img">
                         <a href="{{ item.product.get_absolute_url }}">
-                            <img src="{{ item.product.get_main_image_url }}" alt="{{ item.product.name }}" loading="lazy">
+                            <img src="{{ item.product.get_main_image_url }}"
+                                 alt="{{ item.product.name }}" loading="lazy">
                         </a>
                     </div>
+
+                    <!-- Details -->
                     <div class="cart-item-details">
                         <div class="cart-item-top">
                             {% if item.product.brand %}
                             <span class="cart-item-brand">{{ item.product.brand.name }}</span>
                             {% endif %}
-                            <a href="{{ item.product.get_absolute_url }}" class="cart-item-name">{{ item.product.name }}</a>
+                            <a href="{{ item.product.get_absolute_url }}" class="cart-item-name">
+                                {{ item.product.name }}
+                            </a>
                             {% if item.variant %}
                             <span class="cart-item-variant">
-                                <i class="fas fa-circle" style="color:{{ item.variant.color_hex }};font-size:10px;"></i>
+                                <i class="fas fa-circle"
+                                   style="color:{{ item.variant.color_hex }};font-size:10px;"></i>
                                 {{ item.variant.color }} / Size {{ item.variant.size }}
                             </span>
                             {% endif %}
                         </div>
+
                         <div class="cart-item-bottom">
-                            <!-- Quantity -->
-                            <div class="cart-qty-control">
-                                <button class="qty-btn-sm" onclick="updateCartItem('{{ item.id }}', {{ item.quantity|add:'-1' }})">
+
+                            <!-- ── Quantity Controls ──────────────────────
+                                 data-item-id  : ID العنصر في السلة
+                                 data-max-stock: الحد الأقصى للمخزون
+                                 لا يوجد onclick — JS يقرأ الكمية من الـ DOM
+                            ─────────────────────────────────────────────── -->
+                            <div class="cart-qty-control"
+                                 data-item-id="{{ item.id }}"
+                                 data-max-stock="{% if item.variant %}{{ item.variant.stock_quantity }}{% else %}{{ item.product.stock_quantity }}{% endif %}">
+
+                                <button class="qty-btn-sm qty-btn-min"
+                                        type="button"
+                                        {% if item.quantity <= 1 %}disabled{% endif %}
+                                        title="Decrease">
                                     <i class="fas fa-minus"></i>
                                 </button>
-                                <span class="qty-val" id="qty-{{ item.id }}">{{ item.quantity }}</span>
-                                <button class="qty-btn-sm" onclick="updateCartItem('{{ item.id }}', {{ item.quantity|add:'1' }})">
+
+                                <span class="qty-val" id="qty-{{ item.id }}">
+                                    {{ item.quantity }}
+                                </span>
+
+                                <button class="qty-btn-sm qty-btn-plus"
+                                        type="button"
+                                        {% if item.variant %}
+                                            {% if item.quantity >= item.variant.stock_quantity %}disabled{% endif %}
+                                        {% else %}
+                                            {% if item.quantity >= item.product.stock_quantity %}disabled{% endif %}
+                                        {% endif %}
+                                        title="Increase">
                                     <i class="fas fa-plus"></i>
                                 </button>
+
                             </div>
+
+                            <!-- Price -->
                             <div class="cart-item-price">
-                                <span class="item-unit">{{ item.unit_price|floatformat:0 }} kr each</span>
-                                <strong class="item-total" id="total-{{ item.id }}">{{ item.line_total|floatformat:0 }} kr</strong>
+                                <span class="item-unit">
+                                    {{ item.unit_price|floatformat:0 }} kr each
+                                </span>
+                                <strong class="item-total" id="lineTotal-{{ item.id }}">
+                                    {{ item.line_total|floatformat:0 }} kr
+                                </strong>
                             </div>
+
+                            <!-- Remove -->
                             <form method="post" action="{% url 'cart:remove' item.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="cart-remove-btn" title="Remove">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </form>
+
                         </div>
                     </div>
                 </div>
@@ -73,21 +119,23 @@
                                class="coupon-input">
                         <button type="submit" class="btn-coupon">Apply</button>
                         {% if coupon_code %}
-                        <button type="submit" name="coupon_code" value="" class="btn-coupon-remove">
+                        <button type="submit" name="coupon_code" value=""
+                                class="btn-coupon-remove">
                             <i class="fas fa-times"></i> Remove
                         </button>
                         {% endif %}
                     </form>
                     {% if coupon_code and coupon_discount > 0 %}
                     <div class="coupon-success">
-                        <i class="fas fa-check-circle"></i> Coupon <strong>{{ coupon_code }}</strong> applied!
+                        <i class="fas fa-check-circle"></i>
+                        Coupon <strong>{{ coupon_code }}</strong> applied!
                         You save <strong>{{ coupon_discount|floatformat:0 }} kr</strong>
                     </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Order Summary -->
+            <!-- ── Order Summary ─────────────────────────── -->
             <div class="cart-summary">
                 <div class="summary-card">
                     <h3>Order Summary</h3>
@@ -109,27 +157,32 @@
                         <div class="summary-divider"></div>
                         <div class="summary-row summary-total">
                             <strong>Total</strong>
-                            <strong id="summaryTotal">{{ total_after_discount|floatformat:0 }} kr</strong>
+                            <strong id="summaryTotal">
+                                {{ total_after_discount|floatformat:0 }} kr
+                            </strong>
                         </div>
                     </div>
+
                     <div class="delivery-note">
                         <i class="fas fa-truck"></i> Estimated delivery: 3–5 business days
                     </div>
+
                     {% if user.is_authenticated %}
                     <a href="{% url 'orders:checkout' %}" class="btn-checkout">
                         Proceed to Checkout <i class="fas fa-arrow-right"></i>
                     </a>
                     {% else %}
-                    <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}" class="btn-checkout">
+                    <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}"
+                       class="btn-checkout">
                         Login to Checkout <i class="fas fa-arrow-right"></i>
                     </a>
                     {% endif %}
+
                     <a href="{% url 'products:list' %}" class="btn-continue">
                         <i class="fas fa-arrow-left"></i> Continue Shopping
                     </a>
                 </div>
 
-                <!-- Accepted Payments -->
                 <div class="payment-methods-card">
                     <p>We Accept</p>
                     <div class="payment-icons-row">
@@ -140,14 +193,14 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
         {% else %}
-        <!-- Empty Cart -->
         <div class="empty-state cart-empty">
             <i class="fas fa-shopping-bag"></i>
             <h2>Your Cart is Empty</h2>
-            <p>Looks like you haven't added anything to your cart yet.</p>
+            <p>Looks like you haven't added anything yet.</p>
             <a href="{% url 'products:list' %}" class="btn-primary">Start Shopping</a>
         </div>
         {% endif %}
@@ -155,38 +208,116 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+/* أزرار الكمية المعطّلة */
+.qty-btn-sm:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-async function updateCartItem(itemId, qty) {
-    const resp = await fetch(`/cart/update/${itemId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': getCookie('csrftoken'),
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: `quantity=${qty}`,
-    });
-    const data = await resp.json();
-    if (data.success) {
-        if (qty <= 0) {
-            document.getElementById(`cartItem-${itemId}`)?.remove();
-        } else {
-            document.getElementById(`qty-${itemId}`).textContent = qty;
-        }
-        document.getElementById('summarySubtotal').textContent = Math.round(data.subtotal) + ' kr';
-        document.getElementById('summaryShipping').textContent = Math.round(data.shipping) + ' kr';
-        document.getElementById('summaryTotal').textContent = Math.round(data.total) + ' kr';
-        document.getElementById('cartBadge') && (document.getElementById('cartBadge').textContent = data.total_items);
-        if (data.total_items === 0) location.reload();
-    } else {
-        alert(data.message || 'Could not update quantity.');
-    }
-}
+/* ============================================================
+   Cart Quantity — Event Delegation
+   يقرأ الكمية من الـ DOM وقت الضغط (ديناميكي)
+   وليس من onclick ثابت في الـ HTML
+   ============================================================ */
+(function () {
 
-function getCookie(name) {
-    const v = `; ${document.cookie}`.split(`; ${name}=`);
-    if (v.length === 2) return v.pop().split(';').shift();
-}
+    document.addEventListener('click', async function (e) {
+        const btn = e.target.closest('.qty-btn-min, .qty-btn-plus');
+        if (!btn) return;
+
+        const control  = btn.closest('.cart-qty-control');
+        if (!control) return;
+
+        const itemId   = control.dataset.itemId;
+        const maxStock = parseInt(control.dataset.maxStock) || 999;
+        const qtySpan  = document.getElementById('qty-' + itemId);
+        if (!qtySpan) return;
+
+        // اقرأ الكمية الحالية من الـ DOM الآن — وليس من HTML ثابت
+        const currentQty = parseInt(qtySpan.textContent.trim()) || 1;
+        const newQty     = btn.classList.contains('qty-btn-min')
+                           ? currentQty - 1
+                           : currentQty + 1;
+
+        // ── تحقق محلي قبل الإرسال ──────────────────────────
+        if (newQty < 1) {
+            showToast('Minimum quantity is 1.', 'error');
+            return;
+        }
+        if (newQty > maxStock) {
+            showToast('Only ' + maxStock + ' item(s) available in stock.', 'error');
+            return;
+        }
+
+        // ── تعطيل الأزرار أثناء الانتظار ───────────────────
+        const btnMin = control.querySelector('.qty-btn-min');
+        const btnPls = control.querySelector('.qty-btn-plus');
+        if (btnMin) btnMin.disabled = true;
+        if (btnPls) btnPls.disabled = true;
+
+        try {
+            const resp = await fetch('/cart/update/' + itemId + '/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken':  getCSRFToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: 'quantity=' + newQty,
+            });
+
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+
+            if (data.success) {
+                // حدّث العدد
+                qtySpan.textContent = newQty;
+
+                // حدّث line total
+                const ltEl = document.getElementById('lineTotal-' + itemId);
+                if (ltEl && data.line_total != null)
+                    ltEl.textContent = fmt(data.line_total);
+
+                // حدّث الـ summary
+                const g = (id) => document.getElementById(id);
+                if (g('summarySubtotal')) g('summarySubtotal').textContent = fmt(data.subtotal);
+                if (g('summaryShipping')) g('summaryShipping').textContent = fmt(data.shipping);
+                if (g('summaryTotal'))    g('summaryTotal').textContent    = fmt(data.total);
+
+                // حدّث badge
+                const badge = document.getElementById('cartBadge');
+                if (badge) badge.textContent = data.total_items;
+
+                if (data.total_items === 0) location.reload();
+
+            } else {
+                // فشل — أرجع الكمية
+                qtySpan.textContent = currentQty;
+                showToast(data.message || 'Could not update.', 'error');
+            }
+
+        } catch (err) {
+            qtySpan.textContent = currentQty;
+            showToast('Something went wrong.', 'error');
+        } finally {
+            // أعد تفعيل الأزرار بناءً على الكمية الحقيقية الحالية
+            const finalQty = parseInt(qtySpan.textContent.trim()) || 1;
+            if (btnMin) btnMin.disabled = (finalQty <= 1);
+            if (btnPls) btnPls.disabled = (finalQty >= maxStock);
+        }
+    });
+
+    function fmt(n) {
+        return Math.round(n).toLocaleString('sv-SE') + ' kr';
+    }
+
+})();
 </script>
 {% endblock %}

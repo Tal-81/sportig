@@ -131,7 +131,39 @@ function showToast(message, type = 'success') {
 // =====================
 // Cart Page — updateCartItem (global)
 // =====================
-async function updateCartItem(itemId, qty) {
+
+// Local storage for cart item data
+// Filled from data attributes in the HTML
+function getItemData(itemId) {
+  const row = document.getElementById(`cartItem-${itemId}`);
+  if (!row) return null;
+  return {
+    maxStock: parseInt(row.dataset.maxStock) || 999,
+    currentQty: parseInt(document.getElementById(`qty-${itemId}`)?.textContent) || 1,
+  };
+}
+ 
+async function updateCartItem(itemId, newQty) {
+  // ── Prevent updating to zero or below ──────────────────────
+  if (newQty < 1) {
+    showToast('Minimum quantity is 1.', 'error');
+    return;
+  }
+ 
+  // ──  Verify first how many products are available ────
+  const itemData = getItemData(itemId);
+  if (itemData && newQty > itemData.maxStock) {
+    showToast(`Only ${itemData.maxStock} items available in stock.`, 'error');
+    return;
+  }
+ 
+  // ── Disable buttons while updating ─────────────────────
+  const row    = document.getElementById(`cartItem-${itemId}`);
+  const btnMin = row?.querySelector('.qty-btn-min');
+  const btnPls = row?.querySelector('.qty-btn-plus');
+  if (btnMin) btnMin.disabled = true;
+  if (btnPls) btnPls.disabled = true;
+ 
   try {
     const resp = await fetch(`/cart/update/${itemId}/`, {
       method: 'POST',
@@ -140,26 +172,73 @@ async function updateCartItem(itemId, qty) {
         'X-CSRFToken': getCSRFToken(),
         'X-Requested-With': 'XMLHttpRequest',
       },
-      body: `quantity=${qty}`,
+      body: `quantity=${newQty}`,
     });
+ 
     const data = await resp.json();
+ 
     if (data.success) {
-      if (qty <= 0) {
-        document.getElementById(`cartItem-${itemId}`)?.remove();
-      } else {
-        const qtyEl = document.getElementById(`qty-${itemId}`);
-        if (qtyEl) qtyEl.textContent = qty;
-      }
+      // ── Update quantity in the UI ─────────────────────
+      const qtyEl = document.getElementById(`qty-${itemId}`);
+      if (qtyEl) qtyEl.textContent = newQty;
+ 
+      // ──   Update button states ────────────────────
+      updateButtonStates(itemId, newQty, itemData?.maxStock || 999);
+ 
+      // ──  Update totals ───────────────────────────
       const el = (id) => document.getElementById(id);
-      if (el('summarySubtotal')) el('summarySubtotal').textContent = Math.round(data.subtotal) + ' kr';
-      if (el('summaryShipping')) el('summaryShipping').textContent = Math.round(data.shipping) + ' kr';
-      if (el('summaryTotal'))    el('summaryTotal').textContent    = Math.round(data.total)    + ' kr';
-      if (el('cartBadge'))       el('cartBadge').textContent       = data.total_items;
-      if (data.total_items === 0) location.reload();
+      if (el('summarySubtotal'))
+        el('summarySubtotal').textContent = formatPrice(data.subtotal);
+      if (el('summaryShipping'))
+        el('summaryShipping').textContent = formatPrice(data.shipping);
+      if (el('summaryTotal'))
+        el('summaryTotal').textContent    = formatPrice(data.total);
+ 
+      // ── Update cart badge  ──────────────────────────
+      const badge = document.getElementById('cartBadge');
+      if (badge) badge.textContent = data.total_items;
+ 
+      // ── update line total (price total) ───────────────────────────
+      const lineTotalEl = document.getElementById(`lineTotal-${itemId}`);
+      if (lineTotalEl && data.line_total !== undefined)
+        lineTotalEl.textContent = formatPrice(data.line_total);
+ 
     } else {
+      // ── return to previous quantity on error case ────────────────────
+      const qtyEl = document.getElementById(`qty-${itemId}`);
+      if (qtyEl && itemData) qtyEl.textContent = itemData.currentQty;
       showToast(data.message || 'Could not update quantity.', 'error');
     }
-  } catch { showToast('Something went wrong.', 'error'); }
+ 
+  } catch (err) {
+    console.error('Cart update error:', err);
+    // return to previous quantity on error case
+    const qtyEl = document.getElementById(`qty-${itemId}`);
+    if (qtyEl && itemData) qtyEl.textContent = itemData.currentQty;
+    showToast('Something went wrong. Please try again.', 'error');
+  } finally {
+    // return to normal state (enable count buttons)
+    if (btnMin) btnMin.disabled = false;
+    if (btnPls) btnPls.disabled = false;
+  }
+}
+ 
+function updateButtonStates(itemId, currentQty, maxStock) {
+  const btnMin = document.querySelector(`#cartItem-${itemId} .qty-btn-min`);
+  const btnPls = document.querySelector(`#cartItem-${itemId} .qty-btn-plus`);
+ 
+  if (btnMin) {
+    btnMin.disabled = currentQty <= 1;
+    btnMin.classList.toggle('disabled', currentQty <= 1);
+  }
+  if (btnPls) {
+    btnPls.disabled = currentQty >= maxStock;
+    btnPls.classList.toggle('disabled', currentQty >= maxStock);
+  }
+}
+ 
+function formatPrice(amount) {
+  return Math.round(amount).toLocaleString('sv-SE') + ' kr';
 }
 
 // =====================

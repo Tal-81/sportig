@@ -59,6 +59,9 @@
             </a>
             {% endif %}
 
+            
+            {% if user.is_authenticated %}
+
             <!-- Cart -->
             <a href="{% url 'cart:cart' %}" class="nav-action-btn" title="Cart">
                 <i class="fas fa-shopping-bag"></i>
@@ -68,7 +71,6 @@
             </a>
 
             <!-- User Account -->
-            {% if user.is_authenticated %}
             <div class="nav-item dropdown">
                 <button class="nav-action-btn user-btn">
                     {% if user.avatar %}
