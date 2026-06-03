@@ -8,3 +8,4 @@ class CouponAdmin(admin.ModelAdmin):
     list_filter = ['is_active']
     search_fields = ['code']
     list_editable = ['is_active']
+    

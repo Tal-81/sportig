@@ -29,7 +29,7 @@
                     <div class="out-of-stock-overlay"><span>Out of Stock</span></div>
                     {% endif %}
                 </a>
-                <!-- زر القلب للحذف -->
+                <!-- heart button for removing from wishlist -->
                 <form method="post"
                       action="{% url 'wishlist:toggle' item.product.id %}"
                       class="wishlist-form">

@@ -86,6 +86,7 @@
                     {% else %}
                     <span class="price-sale">{{ product.price|floatformat:0 }} kr</span>
                     {% endif %}
+                    
                     {% if user.is_authenticated %}
                     <form method="post"
                             action="{% url 'wishlist:toggle' product.id %}"
@@ -93,7 +94,7 @@
                             id="productWishlistForm">
                         {% csrf_token %}
                         <button type="submit"
-                                class="btn-wishlist {% if product.id in wishlist_product_ids %}active{% endif %}"
+                                class="btn-wishlist wishlist-btn {% if product.id in wishlist_product_ids %}active{% endif %}"
                                 title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
                                 data-allow-double="true">
                             <i class="fas fa-heart"></i>
@@ -194,13 +195,9 @@
                         <button class="btn-add-cart disabled" disabled>Out of Stock</button>
                         {% endif %}
 
-                        <!-- ══ Wishlist ══ -->
-
                     </div>
                 </form>
                 {% endif %}
-
-
 
                 <!-- Product Meta -->
                 <div class="product-meta-info">

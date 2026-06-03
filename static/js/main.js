@@ -1,7 +1,3 @@
-/* ===================================================
-   JD Sports Clone - Main JavaScript
-   =================================================== */
-
 'use strict';
 
 // =====================
@@ -168,8 +164,8 @@ async function updateCartItem(itemId, qty) {
 
 // =====================
 // Wishlist AJAX
-// الأساسي: event delegation على document
-// يعمل على كل الصفحات: detail, list, wishlist
+// event delegation on document
+// run on all pages detail, list, wishlist
 // =====================
 (function initWishlistAjax() {
 
@@ -179,6 +175,7 @@ async function updateCartItem(itemId, qty) {
     e.preventDefault();
 
     const btn = form.querySelector('.wishlist-btn');
+
     if (btn) btn.style.pointerEvents = 'none';
 
     try {
@@ -191,7 +188,7 @@ async function updateCartItem(itemId, qty) {
         },
       });
 
-      // إذا رجع redirect (مستخدم غير مسجّل) اذهب لصفحة login
+      // redirect handling (e.g. if user is not authenticated)
       if (resp.redirected) {
         window.location.href = resp.url;
         return;
@@ -200,8 +197,8 @@ async function updateCartItem(itemId, qty) {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
 
-      // ── تحديث زر القلب ────────────────────────────
-      // كل أزرار القلب لنفس المنتج في الصفحة
+      // ── Update heart button ───────────────────────────
+      // Update all buttons with the same product ID (could be multiple on page)
       const productId = form.action.match(/\/wishlist\/toggle\/(\d+)\//)?.[1];
       if (productId) {
         document.querySelectorAll(
@@ -212,10 +209,10 @@ async function updateCartItem(itemId, qty) {
         });
       }
 
-      // ── تحديث الـ badge في الـ navbar ─────────────
+      // ── Update wishlist badge in navbar ─────────────
       updateWishlistBadge(data.count);
 
-      // ── إذا كنا في صفحة الـ wishlist وتمت الإزالة ─
+      // ── If we are on the wishlist page and the item was removed ─
       if (!data.in_wishlist && window.location.pathname.startsWith('/wishlist/')) {
         const card = form.closest('.product-card') || form.closest('.wishlist-item-card');
         if (card) {
@@ -232,7 +229,7 @@ async function updateCartItem(itemId, qty) {
 
     } catch (err) {
       console.error('Wishlist error:', err);
-      // Fallback: submit عادي
+      // Fallback: submit the form normally (non-AJAX)
       form.submit();
     } finally {
       if (btn) btn.style.pointerEvents = '';
@@ -270,15 +267,15 @@ async function updateCartItem(itemId, qty) {
   }
 
   function refreshWishlistPage(count) {
-    // حدّث عداد الصفحة
+    // Update wishlist count in header  
     const countEl = document.getElementById('wishlistCount');
     if (countEl) countEl.textContent = count;
 
-    // حدّث عداد الـ modal
+    // Update modal count
     const mc = document.getElementById('modalCount');
     if (mc) mc.textContent = count;
 
-    // إذا فرغت القائمة — اعرض empty state
+    // If the list is empty — display empty state
     const grid = document.getElementById('wishlistGrid');
     if (!grid) return;
     const remaining = grid.querySelectorAll('.product-card').length;
@@ -290,7 +287,7 @@ async function updateCartItem(itemId, qty) {
           <p>Save items you love to your wishlist and find them here anytime.</p>
           <a href="/products/" class="btn-primary">Discover Products</a>
         </div>`;
-      // أخفِ زر Clear
+      // Hide the Clear button
       const clearBtn = document.getElementById('clearWishlistBtn');
       if (clearBtn) clearBtn.style.display = 'none';
     }
