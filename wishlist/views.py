@@ -1,9 +1,3 @@
-"""
-wishlist/views.py — نسخة مصلحة نهائية
-المشكلة: التحقق من AJAX كان يفشل أحياناً
-الحل: ToggleWishlistView يُرجع JSON دائماً إذا كان الـ request يقبل JSON
-"""
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -12,15 +6,6 @@ from django.http import JsonResponse
 
 from .models import WishlistItem
 from products.models import Product
-
-
-def _is_ajax(request):
-    """تحقق هل الطلب AJAX بأي طريقة."""
-    return (
-        request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-        or 'application/json' in request.headers.get('Accept', '')
-        or request.headers.get('Content-Type') == 'application/json'
-    )
 
 
 @method_decorator(login_required, name='dispatch')
@@ -39,13 +24,12 @@ class WishlistView(View):
 
 @method_decorator(login_required, name='dispatch')
 class ToggleWishlistView(View):
+    """يضيف المنتج إذا غير موجود، يحذفه إذا موجود."""
 
     def post(self, request, product_id):
-        product = get_object_or_404(Product, id=product_id, is_active=True)
-
+        product  = get_object_or_404(Product, id=product_id, is_active=True)
         existing = WishlistItem.objects.filter(
-            user=request.user,
-            product=product
+            user=request.user, product=product
         ).first()
 
         if existing:
@@ -56,17 +40,16 @@ class ToggleWishlistView(View):
             in_wishlist = True
 
         count = WishlistItem.objects.filter(user=request.user).count()
-
-        # أرجع JSON دائماً — الـ JS يقرر ماذا يفعل
         return JsonResponse({
-            'success': True,
+            'success':     True,
             'in_wishlist': in_wishlist,
-            'count': count,
+            'count':       count,
         })
 
 
 @method_decorator(login_required, name='dispatch')
 class RemoveFromWishlistView(View):
+    """يحذف عنصراً واحداً بـ WishlistItem.id — يُستدعى من زر Remove في الكارد."""
 
     def post(self, request, item_id):
         item = get_object_or_404(WishlistItem, id=item_id, user=request.user)
@@ -77,11 +60,8 @@ class RemoveFromWishlistView(View):
 
 @method_decorator(login_required, name='dispatch')
 class ClearWishlistView(View):
+    """يحذف كل عناصر الـ wishlist."""
 
     def post(self, request):
-        deleted_count, _ = WishlistItem.objects.filter(user=request.user).delete()
-        return JsonResponse({
-            'success': True,
-            'count': 0,
-            'deleted': deleted_count,
-        })
+        deleted, _ = WishlistItem.objects.filter(user=request.user).delete()
+        return JsonResponse({'success': True, 'count': 0, 'deleted': deleted})

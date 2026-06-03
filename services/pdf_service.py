@@ -14,9 +14,9 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 #  BRANDING CONSTANTS — edit these to customize your invoice
 # ============================================================
 
-COMPANY_NAME      = 'SPportig'
+COMPANY_NAME      = 'Sportig'
 COMPANY_TAGLINE   = 'Premium Sports & Lifestyle'
-COMPANY_EMAIL     = 'support@sportigsports-clone.com'
+COMPANY_EMAIL     = 'support@sportigsports.com'
 COMPANY_WEBSITE   = 'www.sportigsports.com'
 COMPANY_PHONE     = '+46 8 123 456 78'
 COMPANY_ADDRESS   = 'Drottningsgatan 1, 111 51 Stockholm, Sweden'

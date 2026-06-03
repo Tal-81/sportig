@@ -9,7 +9,6 @@
             My Wishlist
             <span class="cart-count-badge" id="wishlistCount">{{ wishlist_items.count }}</span>
         </h1>
-
         {% if wishlist_items %}
         <button type="button" class="btn-clear-wishlist" id="clearWishlistBtn">
             <i class="fas fa-trash-alt"></i> Clear All
@@ -20,7 +19,10 @@
     {% if wishlist_items %}
     <div class="products-grid" id="wishlistGrid">
         {% for item in wishlist_items %}
-        <div class="product-card wishlist-item-card" data-item-id="{{ item.id }}" data-aos="fade-up">
+
+        <div class="product-card wishlist-item-card" id="wishlistCard-{{ item.id }}" data-aos="fade-up">
+
+            <!-- Image -->
             <div class="product-card-image">
                 <a href="{{ item.product.get_absolute_url }}">
                     <img src="{{ item.product.get_main_image_url }}"
@@ -28,11 +30,15 @@
                     {% if not item.product.is_in_stock %}
                     <div class="out-of-stock-overlay"><span>Out of Stock</span></div>
                     {% endif %}
+                    {% if item.product.discount_percentage > 0 %}
+                    <span class="badge-sale">-{{ item.product.discount_percentage }}%</span>
+                    {% endif %}
                 </a>
-                <!-- heart button for removing from wishlist -->
+
+                <!-- Remove from wishlist -->
                 <form method="post"
                       action="{% url 'wishlist:toggle' item.product.id %}"
-                      class="wishlist-form">
+                      class="wishlist-form wishlist-heart-form">
                     {% csrf_token %}
                     <button type="submit"
                             class="quick-action-btn wishlist-btn active"
@@ -41,13 +47,32 @@
                     </button>
                 </form>
             </div>
+
+            <!-- Body -->
             <div class="product-card-body">
                 {% if item.product.brand %}
                 <span class="product-brand">{{ item.product.brand.name }}</span>
                 {% endif %}
+
                 <h3 class="product-name">
                     <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
                 </h3>
+
+                <!-- Rating -->
+                {% if item.product.review_count > 0 %}
+                <div class="product-rating">
+                    <div class="stars">
+                        {% with avg=item.product.average_rating %}
+                        {% for i in "12345" %}
+                        <i class="fas fa-star {% if forloop.counter <= avg %}filled{% endif %}"></i>
+                        {% endfor %}
+                        {% endwith %}
+                    </div>
+                    <span class="rating-count">({{ item.product.review_count }})</span>
+                </div>
+                {% endif %}
+
+                <!-- Price -->
                 <div class="product-price">
                     {% if item.product.discount_price %}
                     <span class="price-current">{{ item.product.discount_price|floatformat:0 }} kr</span>
@@ -56,11 +81,31 @@
                     <span class="price-current">{{ item.product.price|floatformat:0 }} kr</span>
                     {% endif %}
                 </div>
-                <a href="{{ item.product.get_absolute_url }}" class="add-to-cart-btn">
-                    View Product <i class="fas fa-arrow-right"></i>
-                </a>
+
+                <!-- Action Buttons -->
+                <div class="wishlist-card-btns">
+
+                    <!-- View Product -->
+                    <a href="{{ item.product.get_absolute_url }}" class="btn-view-product">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+
+                    <!-- Remove from Wishlist -->
+                    <form method="post"
+                          action="{% url 'wishlist:remove' item.id %}"
+                          class="wishlist-remove-form"
+                          data-card-id="wishlistCard-{{ item.id }}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-remove-wishlist" title="Remove from Wishlist">
+                            <i class="fas fa-heart-broken"></i>
+                            <span>Remove</span>
+                        </button>
+                    </form>
+
+                </div>
             </div>
         </div>
+
         {% endfor %}
     </div>
 
@@ -68,7 +113,7 @@
     <div class="empty-state" id="wishlistEmpty">
         <i class="fas fa-heart"></i>
         <h3>Your Wishlist is Empty</h3>
-        <p>Save items you love to your wishlist and find them here anytime.</p>
+        <p>Save items you love and find them here anytime.</p>
         <a href="{% url 'products:list' %}" class="btn-primary">Discover Products</a>
     </div>
     {% endif %}
@@ -76,33 +121,32 @@
 </div>
 </div>
 
-<!-- Confirm Clear Modal — مخفي افتراضياً بـ display:none في الـ HTML مباشرة -->
+<!-- Clear All Modal -->
 <div id="clearModal"
-     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55);
-            z-index:9999; align-items:center; justify-content:center;">
+     style="display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,0.55); z-index:9999;
+            align-items:center; justify-content:center;">
     <div class="modal-box">
         <div class="modal-icon"><i class="fas fa-trash-alt"></i></div>
         <h3>Clear Wishlist?</h3>
-        <p>
-            This will remove all
-            <strong id="modalCount">{{ wishlist_items.count }}</strong>
-            item{{ wishlist_items.count|pluralize }} from your wishlist.
-        </p>
+        <p>This will remove all <strong id="modalCount">{{ wishlist_items.count }}</strong>
+           item{{ wishlist_items.count|pluralize }} from your wishlist.</p>
         <div class="modal-actions">
             <button class="btn-danger" id="confirmClearBtn">
                 <i class="fas fa-trash-alt"></i> Yes, Clear All
             </button>
-            <button class="btn-outline" id="cancelClearBtn" type="button">
-                Cancel
-            </button>
+            <button class="btn-outline" id="cancelClearBtn" type="button">Cancel</button>
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 
 {% block extra_css %}
 <style>
+
+/* ── Page Header ───────────────────────────── */
 .wishlist-page-header {
     display: flex;
     align-items: center;
@@ -111,6 +155,74 @@
     flex-wrap: wrap;
     gap: 12px;
 }
+
+/* ── Card Action Buttons Row ───────────────── */
+.wishlist-card-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* View Product button */
+.btn-view-product {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 8px;
+    background: #111;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.btn-view-product:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+/* Remove button */
+.wishlist-remove-form { margin: 0; }
+
+.btn-remove-wishlist {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 8px;
+    background: transparent;
+    color: #dc2626;
+    border: 1.5px solid #dc2626;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.btn-remove-wishlist:hover {
+    background: #dc2626;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+}
+.btn-remove-wishlist i {
+    font-size: 13px;
+    transition: transform 0.2s;
+}
+.btn-remove-wishlist:hover i {
+    transform: scale(1.2);
+}
+
+/* Clear All button */
 .btn-clear-wishlist {
     display: inline-flex;
     align-items: center;
@@ -126,11 +238,24 @@
     background: transparent;
     cursor: pointer;
     transition: all 0.2s;
+    font-family: inherit;
 }
 .btn-clear-wishlist:hover {
     background: #dc2626;
     color: #fff;
 }
+
+/* Card remove animation */
+.wishlist-item-card.removing {
+    transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.4s ease;
+    overflow: hidden;
+}
+.wishlist-item-card.removing.out {
+    opacity: 0;
+    transform: scale(0.88) translateY(-8px);
+}
+
+/* Modal */
 .modal-box {
     background: #fff;
     border-radius: 16px;
@@ -148,11 +273,11 @@
 .modal-icon { font-size: 48px; color: #dc2626; margin-bottom: 16px; }
 .modal-box h3 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
 .modal-box p  { font-size: 14px; color: #6b7280; margin-bottom: 24px; }
-.modal-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
+.modal-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* Responsive */
+@media (max-width: 480px) {
+    .wishlist-card-btns { grid-template-columns: 1fr; }
 }
 </style>
 {% endblock %}
@@ -161,39 +286,142 @@
 {% block extra_js %}
 <script>
 (function () {
+
+    // ── helpers ────────────────────────────────────────
+    function getCount() {
+        const grid = document.getElementById('wishlistGrid');
+        return grid ? grid.querySelectorAll('.wishlist-item-card').length : 0;
+    }
+
+    function updateCounters(count) {
+        // counter in title
+        const countEl = document.getElementById('wishlistCount');
+        if (countEl) countEl.textContent = count;
+
+        // counter in modal
+        const mc = document.getElementById('modalCount');
+        if (mc) mc.textContent = count;
+
+        // badge for navbar
+        const badge = document.getElementById('wishlistBadge');
+        if (count > 0) {
+            if (badge) badge.textContent = count;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    function showEmpty() {
+        const grid = document.getElementById('wishlistGrid');
+        if (grid) {
+            grid.outerHTML = `
+                <div class="empty-state" id="wishlistEmpty">
+                    <i class="fas fa-heart"></i>
+                    <h3>Your Wishlist is Empty</h3>
+                    <p>Save items you love and find them here anytime.</p>
+                    <a href="/products/" class="btn-primary">Discover Products</a>
+                </div>`;
+        }
+        const clearBtn = document.getElementById('clearWishlistBtn');
+        if (clearBtn) clearBtn.style.display = 'none';
+    }
+
+    function animateRemove(card, callback) {
+        card.classList.add('removing');
+        // pequeño delay para que el transition se aplique
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                card.classList.add('out');
+                setTimeout(() => {
+                    card.remove();
+                    if (callback) callback();
+                }, 370);
+            });
+        });
+    }
+
+    // ── Remove individual item ──────────────────────────
+    document.addEventListener('submit', async function (e) {
+        const form = e.target;
+        if (!form.classList.contains('wishlist-remove-form')) return;
+        e.preventDefault();
+
+        const cardId = form.dataset.cardId;
+        const card   = document.getElementById(cardId);
+        const btn    = form.querySelector('.btn-remove-wishlist');
+
+        // loading state
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        }
+
+        try {
+            const resp = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken':      getCSRFToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!resp.ok) throw new Error('Server error');
+            const data = await resp.json();
+
+            if (data.success !== false) {
+                //   animate card outside then removal 
+                if (card) {
+                    animateRemove(card, () => {
+                        const remaining = getCount();
+                        updateCounters(remaining);
+                        if (remaining === 0) showEmpty();
+                    });
+                }
+                showToast('Removed from wishlist.', 'success');
+            } else {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-heart-broken"></i><span>Remove</span>';
+                }
+                showToast('Could not remove item.', 'error');
+            }
+
+        } catch (err) {
+            // fallback: submit the form normally
+            form.submit();
+        }
+    });
+
+    // ── Heart button (toggle) on wishlist page ──────────
+    //  handle in main.js by .wishlist-form
+    document.addEventListener('submit', async function (e) {
+        const form = e.target;
+        if (!form.classList.contains('wishlist-heart-form')) return;
+        // main.js يتعامل مع الـ AJAX — نحن نضيف فقط تأخير لتحديث العداد
+        setTimeout(() => {
+            const remaining = getCount();
+            updateCounters(remaining);
+            if (remaining === 0) showEmpty();
+        }, 450);
+    });
+
+    // ── Clear All ───────────────────────────────────────
     const modal      = document.getElementById('clearModal');
     const openBtn    = document.getElementById('clearWishlistBtn');
     const cancelBtn  = document.getElementById('cancelClearBtn');
     const confirmBtn = document.getElementById('confirmClearBtn');
 
-    // ── فتح الـ modal ──────────────────────────────────
-    openBtn?.addEventListener('click', function () {
-        modal.style.display = 'flex';
+    openBtn?.addEventListener('click', () => { modal.style.display = 'flex'; });
+    cancelBtn?.addEventListener('click', () => { modal.style.display = 'none'; });
+    modal?.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') modal.style.display = 'none';
     });
 
-    // ── إغلاق بزر Cancel ──────────────────────────────
-    cancelBtn?.addEventListener('click', function () {
-        modal.style.display = 'none';
-    });
-
-    // ── إغلاق بالضغط خارج الـ modal box ──────────────
-    modal?.addEventListener('click', function (e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-
-    // ── إغلاق بـ Escape ───────────────────────────────
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && modal.style.display === 'flex') {
-            modal.style.display = 'none';
-        }
-    });
-
-    // ── تأكيد المسح ───────────────────────────────────
     confirmBtn?.addEventListener('click', async function () {
         modal.style.display = 'none';
-
         if (openBtn) {
             openBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing...';
             openBtn.disabled  = true;
@@ -203,16 +431,16 @@
             const resp = await fetch("{% url 'wishlist:clear' %}", {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': getCSRFToken(),
+                    'X-CSRFToken':      getCSRFToken(),
                     'X-Requested-With': 'XMLHttpRequest',
                 },
             });
             const data = await resp.json();
 
             if (data.success) {
-                // أزل الكاردات بـ animation متتالية
+                // Move all cards out with a staggered animation
                 const grid  = document.getElementById('wishlistGrid');
-                const cards = grid ? [...grid.querySelectorAll('.product-card')] : [];
+                const cards = grid ? [...grid.querySelectorAll('.wishlist-item-card')] : [];
                 let delay = 0;
                 cards.forEach(card => {
                     setTimeout(() => {
@@ -220,36 +448,16 @@
                         card.style.opacity    = '0';
                         card.style.transform  = 'scale(0.9)';
                     }, delay);
-                    delay += 60;
+                    delay += 55;
                 });
-
                 setTimeout(() => {
-                    // استبدل الـ grid بـ empty state
-                    if (grid) {
-                        grid.outerHTML = `
-                            <div class="empty-state">
-                                <i class="fas fa-heart"></i>
-                                <h3>Your Wishlist is Empty</h3>
-                                <p>Save items you love to your wishlist and find them here anytime.</p>
-                                <a href="/products/" class="btn-primary">Discover Products</a>
-                            </div>`;
-                    }
-                    // أخفِ زر Clear
-                    if (openBtn) openBtn.style.display = 'none';
-
-                    // حدّث العداد في الصفحة
-                    const countEl = document.getElementById('wishlistCount');
-                    if (countEl) countEl.textContent = '0';
-
-                    // حدّث الـ badge في الـ navbar
-                    const badge = document.getElementById('wishlistBadge');
-                    if (badge) badge.remove();
-
-                    showToast('Wishlist cleared successfully!', 'success');
-                }, delay + 300);
+                    updateCounters(0);
+                    showEmpty();
+                    showToast('Wishlist cleared!', 'success');
+                }, delay + 350);
             }
-        } catch (err) {
-            showToast('Something went wrong. Please try again.', 'error');
+        } catch {
+            showToast('Something went wrong.', 'error');
             if (openBtn) {
                 openBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Clear All';
                 openBtn.disabled  = false;
@@ -257,26 +465,6 @@
         }
     });
 
-    // ── تحديث العداد بعد حذف كارد فردي ──────────────
-    document.addEventListener('submit', function () {
-        setTimeout(function () {
-            const grid    = document.getElementById('wishlistGrid');
-            const countEl = document.getElementById('wishlistCount');
-            if (!grid || !countEl) return;
-
-            const remaining = grid.querySelectorAll('.product-card').length;
-            countEl.textContent = remaining;
-
-            // حدّث عدد الـ modal
-            const mc = document.getElementById('modalCount');
-            if (mc) mc.textContent = remaining;
-
-            // إخفاء زر Clear إذا فرغت القائمة
-            if (remaining === 0 && openBtn) {
-                openBtn.style.display = 'none';
-            }
-        }, 400);
-    });
 })();
 </script>
 {% endblock %}
