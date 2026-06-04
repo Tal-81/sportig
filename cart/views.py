@@ -1,8 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views import View
-from django.conf import settings
-
 from .services import CartService
 
 
@@ -14,18 +12,28 @@ class CartView(View):
 
         coupon_discount = 0
         coupon_code     = request.session.get('coupon_code')
+        coupon_message  = None
+        coupon_status   = None
+
         if coupon_code:
             from coupons.services import CouponService
-            discount, _ = CouponService.apply_coupon(coupon_code, cart['subtotal'])
+            discount, message, status = CouponService.apply_coupon(
+                coupon_code, cart['subtotal']
+            )
             if discount:
                 coupon_discount = discount
+            else:
+                #  coupon is invalid — remove it from the session
+                request.session.pop('coupon_code', None)
+                request.session.modified = True
+                coupon_code = None
 
         return render(request, self.template_name, {
-            'cart':               cart,
-            'coupon_discount':    coupon_discount,
-            'coupon_code':        coupon_code,
+            'cart':                 cart,
+            'coupon_discount':      coupon_discount,
+            'coupon_code':          coupon_code,
             'total_after_discount': cart['total'] - coupon_discount,
-            'page_title':         'Shopping Cart',
+            'page_title':           'Shopping Cart',
         })
 
 
@@ -44,7 +52,6 @@ class AddToCartView(View):
                 'message':     message,
                 'total_items': cart['total_items'],
             })
-
         return redirect('cart:cart')
 
 
@@ -61,7 +68,6 @@ class RemoveFromCartView(View):
                 'shipping':    float(cart['shipping']),
                 'total':       float(cart['total']),
             })
-
         return redirect('cart:cart')
 
 
@@ -72,29 +78,19 @@ class UpdateCartView(View):
         except (ValueError, TypeError):
             quantity = 1
 
-        # ── Prevent quantity from going below 1 ──────────
         if quantity < 1:
-            return JsonResponse({
-                'success': False,
-                'message': 'Minimum quantity is 1.',
-            })
+            return JsonResponse({'success': False, 'message': 'Minimum quantity is 1.'})
 
-        # ── Check available stock ────────────────────
+        #  verify stock before updating quantity
         stock_check = _check_stock(request, item_id, quantity)
         if not stock_check['ok']:
-            return JsonResponse({
-                'success': False,
-                'message': stock_check['message'],
-            })
+            return JsonResponse({'success': False, 'message': stock_check['message']})
 
         success, message = CartService.update_quantity(request, item_id, quantity)
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            cart = CartService.get_cart(request)
-
-            # Calculate line_total for the updated item
+            cart       = CartService.get_cart(request)
             line_total = _get_line_total(cart, item_id)
-
             return JsonResponse({
                 'success':     success,
                 'message':     message,
@@ -104,60 +100,86 @@ class UpdateCartView(View):
                 'total':       float(cart['total']),
                 'line_total':  float(line_total),
             })
-
         return redirect('cart:cart')
 
 
 class ApplyCouponView(View):
+    """
+    handle both applying and removing coupons based on 
+    the presence of coupon_code in POST data.
+    return JSON with clear toast messages for each case.
+    """
+
     def post(self, request):
         coupon_code = request.POST.get('coupon_code', '').strip().upper()
+        is_ajax     = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
-        if coupon_code:
-            cart = CartService.get_cart(request)
-            from coupons.services import CouponService
-            discount, message = CouponService.apply_coupon(coupon_code, cart['subtotal'])
-            if discount:
-                request.session['coupon_code'] = coupon_code
-            else:
-                request.session.pop('coupon_code', None)
+        # ── Remove coupon (empty field or Remove button) ──────────
+        if not coupon_code:
+            removed = request.session.pop('coupon_code', None)
+            request.session.modified = True
+
+            if is_ajax:
+                return JsonResponse({
+                    'success': True,
+                    'status':  'removed',
+                    'message': 'Coupon removed.' if removed else '',
+                    'discount': 0,
+                })
+            return redirect('cart:cart')
+
+        # ── apply coupon ──────────────────────────────────
+        cart = CartService.get_cart(request)
+
+        from coupons.services import CouponService
+        discount, message, status = CouponService.apply_coupon(
+            coupon_code, cart['subtotal']
+        )
+
+        if status == 'success':
+            request.session['coupon_code'] = coupon_code
         else:
             request.session.pop('coupon_code', None)
-
         request.session.modified = True
+
+        if is_ajax:
+            cart_updated = CartService.get_cart(request)
+            return JsonResponse({
+                'success':   status == 'success',
+                'status':    status,
+                'message':   message,
+                'discount':  float(discount),
+                'subtotal':  float(cart_updated['subtotal']),
+                'shipping':  float(cart_updated['shipping']),
+                'total':     float(cart_updated['total']),
+                'coupon_code': coupon_code if status == 'success' else '',
+            })
+
         return redirect('cart:cart')
 
 
-# ── Helpers ────────────────────────────────────────────────
+# ── helpers ──────────────────────────────────────────────
 
 def _check_stock(request, item_id, requested_qty):
-    """
-    Check the available stock for the item.
-    Takes into account the variant (color/size) if it exists.
-    """
     try:
         if request.user.is_authenticated:
             from cart.models import CartItem
             item = CartItem.objects.select_related(
                 'product', 'variant'
             ).get(id=item_id, cart__user=request.user)
-
             if item.variant:
                 available = item.variant.stock_quantity
-                label = f"{item.variant.color} / {item.variant.size}"
+                label     = f"{item.variant.color} / {item.variant.size}"
             else:
                 available = item.product.stock_quantity
-                label = item.product.name
-
+                label     = item.product.name
         else:
-            # Session cart
-            cart = request.session.get('cart', {})
-            item_data = cart.get(str(item_id))
+            cart_session = request.session.get('cart', {})
+            item_data    = cart_session.get(str(item_id))
             if not item_data:
-                return {'ok': True}  # Item not found — let the service handle it
-
+                return {'ok': True}
             from products.models import Product, ProductVariant
             product = Product.objects.get(id=item_data['product_id'])
-
             if item_data.get('variant_id'):
                 variant   = ProductVariant.objects.get(id=item_data['variant_id'])
                 available = variant.stock_quantity
@@ -171,18 +193,13 @@ def _check_stock(request, item_id, requested_qty):
                 'ok':      False,
                 'message': f'Only {available} item(s) available for {label}.',
             }
-
         return {'ok': True}
-
     except Exception:
-        # In case of any unexpected error — leave it to the service
         return {'ok': True}
 
 
 def _get_line_total(cart, item_id):
-    """Get the line_total for the item from the updated cart data."""
-    str_id = str(item_id)
     for item in cart.get('items', []):
-        if str(item.get('id', '')) == str_id:
+        if str(item.get('id', '')) == str(item_id):
             return item.get('line_total', 0)
     return 0

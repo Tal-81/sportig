@@ -1,14 +1,8 @@
-"""
-Order views: checkout, order list, order detail.
-"""
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.contrib import messages
 from django.db import transaction
-from django import forms
 
 from .models import Order, OrderItem
 from cart.services import CartService
@@ -29,33 +23,36 @@ class CheckoutView(View):
         user = request.user
         if user.has_complete_address():
             initial = {
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email,
-                'phone': user.phone_number,
-                'street': user.street_name,
-                'building': user.building_number,
+                'first_name':  user.first_name,
+                'last_name':   user.last_name,
+                'email':       user.email,
+                'phone':       user.phone_number,
+                'street':      user.street_name,
+                'building':    user.building_number,
                 'postal_code': user.postal_code,
-                'city': user.city,
-                'country': user.country,
+                'city':        user.city,
+                'country':     user.country,
             }
 
         coupon_discount = 0
-        coupon_code = request.session.get('coupon_code')
+        coupon_code     = request.session.get('coupon_code')
         if coupon_code:
             from coupons.services import CouponService
-            discount, _ = CouponService.apply_coupon(coupon_code, cart['subtotal'])
+            # ← يُرجع 3 قيم الآن
+            discount, message, status = CouponService.apply_coupon(
+                coupon_code, cart['subtotal']
+            )
             if discount:
                 coupon_discount = discount
 
         form = CheckoutForm(initial=initial)
         return render(request, self.template_name, {
-            'cart': cart,
-            'form': form,
-            'coupon_discount': coupon_discount,
-            'coupon_code': coupon_code,
+            'cart':                 cart,
+            'form':                 form,
+            'coupon_discount':      coupon_discount,
+            'coupon_code':          coupon_code,
             'total_after_discount': cart['total'] - coupon_discount,
-            'page_title': 'Checkout',
+            'page_title':           'Checkout',
         })
 
     def post(self, request):
@@ -66,10 +63,13 @@ class CheckoutView(View):
         form = CheckoutForm(request.POST)
         if form.is_valid():
             coupon_discount = 0
-            coupon_code = request.session.get('coupon_code')
+            coupon_code     = request.session.get('coupon_code')
             if coupon_code:
                 from coupons.services import CouponService
-                discount, _ = CouponService.apply_coupon(coupon_code, cart['subtotal'])
+                # ← يُرجع 3 قيم الآن
+                discount, message, status = CouponService.apply_coupon(
+                    coupon_code, cart['subtotal']
+                )
                 if discount:
                     coupon_discount = discount
 
@@ -111,20 +111,27 @@ class CheckoutView(View):
                         quantity=item['quantity'],
                     )
 
-            # Store order ID in session for payment
             request.session['pending_order_id'] = order.id
             return redirect('payments:checkout', order_id=order.id)
 
-        # Re-render with errors
+        # إعادة عرض النموذج مع الأخطاء
         coupon_discount = 0
-        coupon_code = request.session.get('coupon_code')
+        coupon_code     = request.session.get('coupon_code')
+        if coupon_code:
+            from coupons.services import CouponService
+            discount, message, status = CouponService.apply_coupon(
+                coupon_code, cart['subtotal']
+            )
+            if discount:
+                coupon_discount = discount
+
         return render(request, self.template_name, {
-            'cart': cart,
-            'form': form,
-            'coupon_discount': coupon_discount,
-            'coupon_code': coupon_code,
+            'cart':                 cart,
+            'form':                 form,
+            'coupon_discount':      coupon_discount,
+            'coupon_code':          coupon_code,
             'total_after_discount': cart['total'] - coupon_discount,
-            'page_title': 'Checkout',
+            'page_title':           'Checkout',
         })
 
 
@@ -133,11 +140,11 @@ class OrderListView(View):
     template_name = 'orders/order_list.html'
 
     def get(self, request):
-        orders = Order.objects.filter(user=request.user).prefetch_related(
-            'items'
-        ).order_by('-created_at')
+        orders = Order.objects.filter(
+            user=request.user
+        ).prefetch_related('items').order_by('-created_at')
         return render(request, self.template_name, {
-            'orders': orders,
+            'orders':     orders,
             'page_title': 'My Orders',
         })
 
@@ -150,10 +157,10 @@ class OrderDetailView(View):
         order = get_object_or_404(
             Order.objects.prefetch_related('items__product', 'items__variant'),
             order_number=order_number,
-            user=request.user
+            user=request.user,
         )
         return render(request, self.template_name, {
-            'order': order,
+            'order':      order,
             'page_title': f'Order #{order.order_number}',
         })
 
@@ -161,10 +168,11 @@ class OrderDetailView(View):
 @method_decorator(login_required, name='dispatch')
 class DownloadInvoiceView(View):
     def get(self, request, order_number):
+        from django.contrib import messages
         order = get_object_or_404(
             Order.objects.prefetch_related('items__product'),
             order_number=order_number,
-            user=request.user
+            user=request.user,
         )
         if order.payment_status != 'completed':
             messages.error(request, 'Invoice only available for paid orders.')

@@ -18,12 +18,12 @@
         {% if cart.items %}
         <div class="cart-layout">
 
-            <!-- ── Cart Items ────────────────────────────── -->
+            <!-- Cart Items -->
             <div class="cart-items-wrap">
                 {% for item in cart.items %}
 
                 <div class="cart-item" id="cartItem-{{ item.id }}">
-
+                    
                     <!-- Image -->
                     <div class="cart-item-img">
                         <a href="{{ item.product.get_absolute_url }}">
@@ -52,49 +52,29 @@
 
                         <div class="cart-item-bottom">
 
-                            <!-- ── Quantity Controls ──────────────────────
-                                 data-item-id  : product ID in the cart  
-                                 data-max-stock: maximum stock quantity
-                                 no onclick — JS reads quantity from the DOM
-                            ─────────────────────────────────────────────── -->
+                            <!-- Quantity Controls -->
                             <div class="cart-qty-control"
                                  data-item-id="{{ item.id }}"
                                  data-max-stock="{% if item.variant %}{{ item.variant.stock_quantity }}{% else %}{{ item.product.stock_quantity }}{% endif %}">
-
-                                <button class="qty-btn-sm qty-btn-min"
-                                        type="button"
-                                        {% if item.quantity <= 1 %}disabled{% endif %}
-                                        title="Decrease">
+                                
+                                 <button class="qty-btn-sm qty-btn-min" type="button"
+                                        {% if item.quantity <= 1 %}disabled{% endif %}>
                                     <i class="fas fa-minus"></i>
                                 </button>
-
-                                <span class="qty-val" id="qty-{{ item.id }}">
-                                    {{ item.quantity }}
-                                </span>
-
-                                <button class="qty-btn-sm qty-btn-plus"
-                                        type="button"
-                                        {% if item.variant %}
-                                            {% if item.quantity >= item.variant.stock_quantity %}disabled{% endif %}
-                                        {% else %}
-                                            {% if item.quantity >= item.product.stock_quantity %}disabled{% endif %}
-                                        {% endif %}
-                                        title="Increase">
+                                <span class="qty-val" id="qty-{{ item.id }}">{{ item.quantity }}</span>
+                                <button class="qty-btn-sm qty-btn-plus" type="button"
+                                        {% if item.variant %}{% if item.quantity >= item.variant.stock_quantity %}disabled{% endif %}
+                                        {% else %}{% if item.quantity >= item.product.stock_quantity %}disabled{% endif %}{% endif %}>
                                     <i class="fas fa-plus"></i>
                                 </button>
-
                             </div>
-
                             <!-- Price -->
                             <div class="cart-item-price">
-                                <span class="item-unit">
-                                    {{ item.unit_price|floatformat:0 }} kr each
-                                </span>
+                                <span class="item-unit">{{ item.unit_price|floatformat:0 }} kr each</span>
                                 <strong class="item-total" id="lineTotal-{{ item.id }}">
                                     {{ item.line_total|floatformat:0 }} kr
                                 </strong>
                             </div>
-
                             <!-- Remove -->
                             <form method="post" action="{% url 'cart:remove' item.id %}">
                                 {% csrf_token %}
@@ -102,40 +82,54 @@
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </form>
-
                         </div>
                     </div>
                 </div>
                 {% endfor %}
 
-                <!-- Coupon -->
+                <!-- ══ Coupon Section ═══════════════════════════════ -->
                 <div class="coupon-section">
                     <h4><i class="fas fa-tag"></i> Have a coupon?</h4>
-                    <form method="post" action="{% url 'cart:apply_coupon' %}" class="coupon-form">
+
+                    <div class="coupon-form" id="couponForm">
                         {% csrf_token %}
-                        <input type="text" name="coupon_code"
+                        <input type="text"
+                               id="couponInput"
                                placeholder="Enter coupon code"
                                value="{{ coupon_code|default:'' }}"
-                               class="coupon-input">
-                        <button type="submit" class="btn-coupon">Apply</button>
+                               class="coupon-input"
+                               autocomplete="off"
+                               maxlength="50">
+                        <button type="button"
+                                class="btn-coupon"
+                                id="applyCouponBtn">
+                            Apply
+                        </button>
                         {% if coupon_code %}
-                        <button type="submit" name="coupon_code" value=""
-                                class="btn-coupon-remove">
+                        <button type="button"
+                                class="btn-coupon-remove"
+                                id="removeCouponBtn">
                             <i class="fas fa-times"></i> Remove
                         </button>
                         {% endif %}
-                    </form>
+                    </div>
+
+                    <!-- Coupon Toast Area — رسائل الكوبون هنا -->
+                    <div id="couponFeedback" class="coupon-feedback" style="display:none;"></div>
+
                     {% if coupon_code and coupon_discount > 0 %}
-                    <div class="coupon-success">
+                    <div class="coupon-active-badge" id="couponActiveBadge">
                         <i class="fas fa-check-circle"></i>
                         Coupon <strong>{{ coupon_code }}</strong> applied!
                         You save <strong>{{ coupon_discount|floatformat:0 }} kr</strong>
                     </div>
+                    {% else %}
+                    <div class="coupon-active-badge" id="couponActiveBadge" style="display:none;"></div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- ── Order Summary ─────────────────────────── -->
+            <!-- Order Summary -->
             <div class="cart-summary">
                 <div class="summary-card">
                     <h3>Order Summary</h3>
@@ -148,41 +142,38 @@
                             <span>Shipping</span>
                             <span id="summaryShipping">{{ cart.shipping|floatformat:0 }} kr</span>
                         </div>
-                        {% if coupon_discount > 0 %}
-                        <div class="summary-row discount-row">
-                            <span>Discount ({{ coupon_code }})</span>
-                            <span>-{{ coupon_discount|floatformat:0 }} kr</span>
+                        <div class="summary-row discount-row"
+                             id="discountRow"
+                             style="{% if not coupon_discount %}display:none{% endif %}">
+                            <span id="discountLabel">
+                                Discount{% if coupon_code %} ({{ coupon_code }}){% endif %}
+                            </span>
+                            <span id="discountAmount">
+                                {% if coupon_discount %}-{{ coupon_discount|floatformat:0 }} kr{% endif %}
+                            </span>
                         </div>
-                        {% endif %}
                         <div class="summary-divider"></div>
                         <div class="summary-row summary-total">
                             <strong>Total</strong>
-                            <strong id="summaryTotal">
-                                {{ total_after_discount|floatformat:0 }} kr
-                            </strong>
+                            <strong id="summaryTotal">{{ total_after_discount|floatformat:0 }} kr</strong>
                         </div>
                     </div>
-
                     <div class="delivery-note">
                         <i class="fas fa-truck"></i> Estimated delivery: 3–5 business days
                     </div>
-
                     {% if user.is_authenticated %}
                     <a href="{% url 'orders:checkout' %}" class="btn-checkout">
                         Proceed to Checkout <i class="fas fa-arrow-right"></i>
                     </a>
                     {% else %}
-                    <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}"
-                       class="btn-checkout">
+                    <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}" class="btn-checkout">
                         Login to Checkout <i class="fas fa-arrow-right"></i>
                     </a>
                     {% endif %}
-
                     <a href="{% url 'products:list' %}" class="btn-continue">
                         <i class="fas fa-arrow-left"></i> Continue Shopping
                     </a>
                 </div>
-
                 <div class="payment-methods-card">
                     <p>We Accept</p>
                     <div class="payment-icons-row">
@@ -193,7 +184,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         {% else %}
@@ -208,60 +198,104 @@
 </div>
 {% endblock %}
 
+
 {% block extra_css %}
 <style>
-/*   disabled quantity buttons  */
-.qty-btn-sm:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    pointer-events: none;
+/* Qty buttons disabled */
+.qty-btn-sm:disabled { opacity:.3; cursor:not-allowed; pointer-events:none; }
+
+/* Coupon feedback inline */
+.coupon-feedback {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    animation: slideDown 0.3s ease;
 }
+@keyframes slideDown {
+    from { opacity:0; transform:translateY(-6px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Success ── */
+.coupon-feedback.cf-success {
+    background: #f0fdf4;
+    border: 1.5px solid #16a34a;
+    color: #14532d;
+}
+.coupon-feedback.cf-success .cf-icon { color: #16a34a; font-size: 18px; }
+
+/* ── Error / Invalid ── */
+.coupon-feedback.cf-error {
+    background: #fef2f2;
+    border: 1.5px solid #dc2626;
+    color: #7f1d1d;
+}
+.coupon-feedback.cf-error .cf-icon { color: #dc2626; font-size: 18px; }
+
+/* ── Expired ── */
+.coupon-feedback.cf-expired {
+    background: #fff7ed;
+    border: 1.5px solid #ea580c;
+    color: #7c2d12;
+}
+.coupon-feedback.cf-expired .cf-icon { color: #ea580c; font-size: 18px; }
+
+/* ── Min Amount ── */
+.coupon-feedback.cf-min_amount {
+    background: #fefce8;
+    border: 1.5px solid #ca8a04;
+    color: #713f12;
+}
+.coupon-feedback.cf-min_amount .cf-icon { color: #ca8a04; font-size: 18px; }
+
+/* Active coupon badge */
+.coupon-active-badge {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #f0fdf4;
+    border: 1.5px solid #16a34a;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #14532d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.coupon-active-badge i { color: #16a34a; }
+
+/* Coupon input loading state */
+.coupon-input.loading { opacity: 0.6; pointer-events: none; }
+.btn-coupon.loading   { opacity: 0.7; pointer-events: none; }
 </style>
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
-/* ============================================================
-   Cart Quantity — Event Delegation
-   reads the quantity from the DOM when clicked (dynamic)
-   instead of using a static onclick in the HTML
-   ============================================================ */
+/* ── Cart Quantity Controls ──────────────────────────── */
 (function () {
-
     document.addEventListener('click', async function (e) {
         const btn = e.target.closest('.qty-btn-min, .qty-btn-plus');
         if (!btn) return;
-
         const control  = btn.closest('.cart-qty-control');
         if (!control) return;
-
         const itemId   = control.dataset.itemId;
         const maxStock = parseInt(control.dataset.maxStock) || 999;
         const qtySpan  = document.getElementById('qty-' + itemId);
         if (!qtySpan) return;
-
-        // read the current quantity from the DOM now — not from static HTML
         const currentQty = parseInt(qtySpan.textContent.trim()) || 1;
-        const newQty     = btn.classList.contains('qty-btn-min')
-                           ? currentQty - 1
-                           : currentQty + 1;
-
-        // ── local validation before submission ──────────────────────────
-        if (newQty < 1) {
-            showToast('Minimum quantity is 1.', 'error');
-            return;
-        }
-        if (newQty > maxStock) {
-            showToast('Only ' + maxStock + ' item(s) available in stock.', 'error');
-            return;
-        }
-
-        // ── disable buttons while waiting ───────────────────
+        const newQty     = btn.classList.contains('qty-btn-min') ? currentQty - 1 : currentQty + 1;
+        if (newQty < 1)        { showToast('Minimum quantity is 1.', 'error'); return; }
+        if (newQty > maxStock) { showToast('Only ' + maxStock + ' available in stock.', 'error'); return; }
         const btnMin = control.querySelector('.qty-btn-min');
         const btnPls = control.querySelector('.qty-btn-plus');
         if (btnMin) btnMin.disabled = true;
         if (btnPls) btnPls.disabled = true;
-
         try {
             const resp = await fetch('/cart/update/' + itemId + '/', {
                 method: 'POST',
@@ -272,51 +306,214 @@
                 },
                 body: 'quantity=' + newQty,
             });
+            if (!resp.ok) throw new Error();
+            const data = await resp.json();
+            if (data.success) {
+                qtySpan.textContent = newQty;
+                const lt = document.getElementById('lineTotal-' + itemId);
+                if (lt && data.line_total != null) lt.textContent = fmt(data.line_total);
+                const g = (id) => document.getElementById(id);
+                if (g('summarySubtotal')) g('summarySubtotal').textContent = fmt(data.subtotal);
+                if (g('summaryShipping')) g('summaryShipping').textContent = fmt(data.shipping);
+                if (g('summaryTotal'))    g('summaryTotal').textContent    = fmt(data.total);
+                const badge = document.getElementById('cartBadge');
+                if (badge) badge.textContent = data.total_items;
+                if (data.total_items === 0) location.reload();
+            } else {
+                qtySpan.textContent = currentQty;
+                showToast(data.message || 'Could not update.', 'error');
+            }
+        } catch {
+            qtySpan.textContent = currentQty;
+            showToast('Something went wrong.', 'error');
+        } finally {
+            const fq = parseInt(qtySpan.textContent.trim()) || 1;
+            if (btnMin) btnMin.disabled = (fq <= 1);
+            if (btnPls) btnPls.disabled = (fq >= maxStock);
+        }
+    });
+    function fmt(n) { return Math.round(n).toLocaleString('sv-SE') + ' kr'; }
+})();
 
-            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+/* ── Coupon System ──────────────────────────────────── */
+(function () {
+
+    const input      = document.getElementById('couponInput');
+    const applyBtn   = document.getElementById('applyCouponBtn');
+    const removeBtn  = document.getElementById('removeCouponBtn');
+    const feedback   = document.getElementById('couponFeedback');
+    const activeBadge = document.getElementById('couponActiveBadge');
+
+    // إيقونة لكل حالة
+    const ICONS = {
+        success:    'fas fa-check-circle',
+        error:      'fas fa-times-circle',
+        invalid:    'fas fa-times-circle',
+        expired:    'fas fa-calendar-times',
+        inactive:   'fas fa-ban',
+        min_amount: 'fas fa-exclamation-triangle',
+        removed:    'fas fa-tag',
+    };
+
+    function showFeedback(message, status) {
+        if (!feedback || !message) return;
+
+        // حدد الكلاس بناءً على الحالة
+        const cls = status === 'success' ? 'cf-success'
+                  : status === 'expired'    ? 'cf-expired'
+                  : status === 'min_amount' ? 'cf-min_amount'
+                  : 'cf-error';
+
+        const iconClass = ICONS[status] || ICONS.error;
+
+        feedback.className  = `coupon-feedback ${cls}`;
+        feedback.innerHTML  = `
+            <i class="${iconClass} cf-icon"></i>
+            <span>${message}</span>`;
+        feedback.style.display = 'flex';
+
+        // إخفاء تلقائي بعد 6 ثواني
+        clearTimeout(feedback._timer);
+        feedback._timer = setTimeout(() => {
+            feedback.style.opacity = '0';
+            feedback.style.transition = 'opacity 0.5s';
+            setTimeout(() => {
+                feedback.style.display  = 'none';
+                feedback.style.opacity  = '';
+                feedback.style.transition = '';
+            }, 500);
+        }, 6000);
+    }
+
+    async function applyCoupon() {
+        const code = input?.value.trim();
+        if (!code) {
+            showFeedback('Please enter a coupon code first.', 'invalid');
+            input?.focus();
+            return;
+        }
+
+        // loading state
+        if (applyBtn) { applyBtn.textContent = '...'; applyBtn.disabled = true; }
+        if (input)    input.classList.add('loading');
+
+        try {
+            const formData = new FormData();
+            formData.append('coupon_code', code);
+            formData.append('csrfmiddlewaretoken', getCSRFToken());
+
+            const resp = await fetch("{% url 'cart:apply_coupon' %}", {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body:   formData,
+            });
+
+            if (!resp.ok) throw new Error();
             const data = await resp.json();
 
+            // ── تحديث الـ UI ────────────────────────────────
+            showFeedback(data.message, data.status);
+
             if (data.success) {
-                // update quantity
-                qtySpan.textContent = newQty;
-
-                // update line total
-                const ltEl = document.getElementById('lineTotal-' + itemId);
-                if (ltEl && data.line_total != null)
-                    ltEl.textContent = fmt(data.line_total);
-
-                // update summary
+                // حدّث الـ Summary
                 const g = (id) => document.getElementById(id);
                 if (g('summarySubtotal')) g('summarySubtotal').textContent = fmt(data.subtotal);
                 if (g('summaryShipping')) g('summaryShipping').textContent = fmt(data.shipping);
                 if (g('summaryTotal'))    g('summaryTotal').textContent    = fmt(data.total);
 
-                // update badge
-                const badge = document.getElementById('cartBadge');
-                if (badge) badge.textContent = data.total_items;
+                // أظهر سطر الخصم
+                const discRow   = document.getElementById('discountRow');
+                const discLabel = document.getElementById('discountLabel');
+                const discAmt   = document.getElementById('discountAmount');
+                if (discRow)   discRow.style.display   = '';
+                if (discLabel) discLabel.textContent    = `Discount (${data.coupon_code})`;
+                if (discAmt)   discAmt.textContent      = `-${fmt(data.discount)}`;
 
-                if (data.total_items === 0) location.reload();
+                // أظهر الـ active badge
+                if (activeBadge) {
+                    activeBadge.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        Coupon <strong>${data.coupon_code}</strong> applied!
+                        You save <strong>${fmt(data.discount)}</strong>`;
+                    activeBadge.style.display = 'flex';
+                }
+
+                // أضف زر Remove إذا لم يكن موجوداً
+                if (!removeBtn) {
+                    const newRemoveBtn = document.createElement('button');
+                    newRemoveBtn.type      = 'button';
+                    newRemoveBtn.id        = 'removeCouponBtn';
+                    newRemoveBtn.className = 'btn-coupon-remove';
+                    newRemoveBtn.innerHTML = '<i class="fas fa-times"></i> Remove';
+                    newRemoveBtn.addEventListener('click', removeCoupon);
+                    applyBtn?.parentElement?.appendChild(newRemoveBtn);
+                }
 
             } else {
-                // Failed — return to original quantity
-                qtySpan.textContent = currentQty;
-                showToast(data.message || 'Could not update.', 'error');
+                // فشل — أخفِ سطر الخصم والـ badge
+                const discRow = document.getElementById('discountRow');
+                if (discRow) discRow.style.display = 'none';
+                if (activeBadge) activeBadge.style.display = 'none';
             }
 
         } catch (err) {
-            qtySpan.textContent = currentQty;
-            showToast('Something went wrong.', 'error');
+            showFeedback('Something went wrong. Please try again.', 'invalid');
         } finally {
-            // return to enabling buttons based on the actual current quantity
-            const finalQty = parseInt(qtySpan.textContent.trim()) || 1;
-            if (btnMin) btnMin.disabled = (finalQty <= 1);
-            if (btnPls) btnPls.disabled = (finalQty >= maxStock);
+            if (applyBtn) { applyBtn.textContent = 'Apply'; applyBtn.disabled = false; }
+            if (input)    input.classList.remove('loading');
+        }
+    }
+
+    async function removeCoupon() {
+        if (applyBtn) applyBtn.disabled = true;
+
+        try {
+            const formData = new FormData();
+            formData.append('coupon_code', '');
+            formData.append('csrfmiddlewaretoken', getCSRFToken());
+
+            const resp = await fetch("{% url 'cart:apply_coupon' %}", {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body:   formData,
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                // أعد حساب الـ total بدون خصم
+                const sub  = parseFloat(document.getElementById('summarySubtotal')?.textContent) || 0;
+                const ship = parseFloat(document.getElementById('summaryShipping')?.textContent) || 0;
+
+                const g = (id) => document.getElementById(id);
+                const discRow = document.getElementById('discountRow');
+                if (discRow) discRow.style.display = 'none';
+                if (activeBadge) activeBadge.style.display = 'none';
+                if (input) input.value = '';
+
+                // أعد تحميل الصفحة لتحديث الـ total بشكل صحيح
+                location.reload();
+            }
+        } catch {
+            showFeedback('Could not remove coupon.', 'invalid');
+        } finally {
+            if (applyBtn) applyBtn.disabled = false;
+        }
+    }
+
+    // Event listeners
+    applyBtn?.addEventListener('click', applyCoupon);
+    removeBtn?.addEventListener('click', removeCoupon);
+
+    // Enter key في حقل الكوبون
+    input?.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            applyCoupon();
         }
     });
 
-    function fmt(n) {
-        return Math.round(n).toLocaleString('sv-SE') + ' kr';
-    }
+    function fmt(n) { return Math.round(n).toLocaleString('sv-SE') + ' kr'; }
 
 })();
 </script>
