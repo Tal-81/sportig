@@ -1,0 +1,1774 @@
+{
+	"id": "8ccb609f-f9aa-4906-a89b-c3461c755ddb",
+	"name": "Sportig Django — Full Test Suite",
+	"timestamp": "2026-06-07T15:52:21.738Z",
+	"collection_id": "26193221-2d90ca29-91fb-4c32-8645-014de1a1a9a0",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 62,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2026-06-07T15:51:35.238Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "8d3067a1-d6a5-41a8-bbca-c62abd76e902",
+			"name": "GET Homepage — Extract CSRF",
+			"url": "http://127.0.0.1:8000/",
+			"time": 591,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true,
+				"Page contains Sportig": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Page contains Sportig": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				591
+			],
+			"allTests": [
+				{
+					"Status 200": true,
+					"Page contains Sportig": true
+				}
+			]
+		},
+		{
+			"id": "a455ab70-ff1c-4161-829e-49126a48f94d",
+			"name": "GET Register Page",
+			"url": "http://127.0.0.1:8000/users/register/",
+			"time": 347,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true,
+				"Has registration form": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has registration form": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				347
+			],
+			"allTests": [
+				{
+					"Status 200": true,
+					"Has registration form": true
+				}
+			]
+		},
+		{
+			"id": "54028e92-6a35-4615-98e0-991806ae4306",
+			"name": "POST Register New User",
+			"url": "http://127.0.0.1:8000/users/register/",
+			"time": 339,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Redirect after register (302)": true
+			},
+			"testPassFailCounts": {
+				"Redirect after register (302)": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				339
+			],
+			"allTests": [
+				{
+					"Redirect after register (302)": true
+				}
+			]
+		},
+		{
+			"id": "a7b5d9b5-f38f-4081-a74e-c7e36debcbbd",
+			"name": "GET Login Page",
+			"url": "http://127.0.0.1:8000/users/login/",
+			"time": 254,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				254
+			],
+			"allTests": [
+				{
+					"Status 200": true
+				}
+			]
+		},
+		{
+			"id": "97d433b8-4dbd-4587-89e1-99d248fa26f2",
+			"name": "POST Login — Valid Credentials",
+			"url": "http://127.0.0.1:8000/users/login/",
+			"time": 593,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Login successful (200 or 302)": true
+			},
+			"testPassFailCounts": {
+				"Login successful (200 or 302)": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				593
+			],
+			"allTests": [
+				{
+					"Login successful (200 or 302)": true
+				}
+			]
+		},
+		{
+			"id": "83086bfe-c9dd-4aa5-9b0b-daf59a30ab25",
+			"name": "POST Login — Wrong Password",
+			"url": "http://127.0.0.1:8000/users/login/",
+			"time": 4975,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Login fails with wrong password": true
+			},
+			"testPassFailCounts": {
+				"Login fails with wrong password": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				4975
+			],
+			"allTests": [
+				{
+					"Login fails with wrong password": true
+				}
+			]
+		},
+		{
+			"id": "e4a00fb7-81eb-4d02-84c7-2025e4dc2f67",
+			"name": "GET Profile Page",
+			"url": "http://127.0.0.1:8000/users/profile/",
+			"time": 440,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200 (logged in) or 302 (redirect to login)": true
+			},
+			"testPassFailCounts": {
+				"Status 200 (logged in) or 302 (redirect to login)": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				440
+			],
+			"allTests": [
+				{
+					"Status 200 (logged in) or 302 (redirect to login)": true
+				}
+			]
+		},
+		{
+			"id": "f94a0f7b-9486-4aad-8136-993b41c137c4",
+			"name": "GET Edit Profile Page",
+			"url": "http://127.0.0.1:8000/users/profile/edit/",
+			"time": 384,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				384
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "fc308281-e32b-4b34-b791-6d5d7972b5fe",
+			"name": "POST Edit Profile",
+			"url": "http://127.0.0.1:8000/users/profile/edit/",
+			"time": 367,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Profile update response": true
+			},
+			"testPassFailCounts": {
+				"Profile update response": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				367
+			],
+			"allTests": [
+				{
+					"Profile update response": true
+				}
+			]
+		},
+		{
+			"id": "28d23cf8-5d3b-4248-8c9c-b0cc11b26c40",
+			"name": "GET Change Password Page",
+			"url": "http://127.0.0.1:8000/users/profile/change-password/",
+			"time": 384,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				384
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "8986ccdb-3eda-40ca-8fb7-281693a842cd",
+			"name": "GET Password Reset Page",
+			"url": "http://127.0.0.1:8000/users/password-reset/",
+			"time": 449,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				449
+			],
+			"allTests": [
+				{
+					"Status 200": true
+				}
+			]
+		},
+		{
+			"id": "b53c5761-9cee-4afd-95ba-cf700ff8d5ed",
+			"name": "GET All Products",
+			"url": "http://127.0.0.1:8000/products/",
+			"time": 423,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true,
+				"Has products page": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has products page": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				423
+			],
+			"allTests": [
+				{
+					"Status 200": true,
+					"Has products page": true
+				}
+			]
+		},
+		{
+			"id": "7c619c01-60e3-453a-97b1-1501bb6b149a",
+			"name": "GET Products — Search",
+			"url": "http://127.0.0.1:8000/products/?q=NIKE",
+			"time": 402,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Search returns 200": true
+			},
+			"testPassFailCounts": {
+				"Search returns 200": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				402
+			],
+			"allTests": [
+				{
+					"Search returns 200": true
+				}
+			]
+		},
+		{
+			"id": "e7eb4a02-d165-438a-86a9-b4e130b7c65f",
+			"name": "GET Products — Filter by Gender (Men)",
+			"url": "http://127.0.0.1:8000/products/?gender=men",
+			"time": 511,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				511
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "1d4ebd80-5d8e-4da1-ae39-47a5f020787c",
+			"name": "GET Products — Filter by Price Range",
+			"url": "http://127.0.0.1:8000/products/?min_price=100&max_price=1000",
+			"time": 545,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				545
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "7af73f4e-c8c2-444c-9810-437f26764eff",
+			"name": "GET Products — Sort by Price Asc",
+			"url": "http://127.0.0.1:8000/products/?sort=price_asc",
+			"time": 437,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				437
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b84a86d4-b5ff-4887-b26d-3340b5cd8480",
+			"name": "GET Products — Sort by Newest",
+			"url": "http://127.0.0.1:8000/products/?sort=newest",
+			"time": 444,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				444
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "04c7a595-f1bd-492f-8ddf-5201b2aabee2",
+			"name": "GET Product Detail",
+			"url": "http://127.0.0.1:8000/products/Women-Casual-Athletic-T-Shirt/",
+			"time": 460,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Product detail returns 200": true,
+				"Product page has product name": true,
+				"Product page has price in kr": true
+			},
+			"testPassFailCounts": {
+				"Product detail returns 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Product page has product name": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Product page has price in kr": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				460
+			],
+			"allTests": [
+				{
+					"Product detail returns 200": true,
+					"Product page has product name": true,
+					"Product page has price in kr": true
+				}
+			]
+		},
+		{
+			"id": "c4610714-13c8-4dd3-bf4d-43b4dc47def7",
+			"name": "GET Category — Sneakers",
+			"url": "http://127.0.0.1:8000/products/category/sneakers/",
+			"time": 398,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				398
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "676d4017-aa21-4932-a2e9-2f42cf4e6099",
+			"name": "GET Category — Sportswear",
+			"url": "http://127.0.0.1:8000/products/category/sportswear/",
+			"time": 303,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				303
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "5bc0e5ff-f0c2-450e-8e28-4f8a5e5edfcd",
+			"name": "GET Recently Viewed",
+			"url": "http://127.0.0.1:8000/products/recently-viewed/",
+			"time": 408,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				408
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "88587293-4791-47c6-bdd8-e54129cc20e1",
+			"name": "GET Product Variants (AJAX)",
+			"url": "http://127.0.0.1:8000/products/api/1/variants/?color=Black",
+			"time": 270,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true,
+				"Returns JSON": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Returns JSON": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				270
+			],
+			"allTests": [
+				{
+					"Status 200": true,
+					"Returns JSON": true
+				}
+			]
+		},
+		{
+			"id": "644ba1b7-63f0-4ee2-b159-a5826ec4fe77",
+			"name": "GET Cart Page",
+			"url": "http://127.0.0.1:8000/cart/",
+			"time": 396,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true,
+				"Has cart content": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has cart content": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				396
+			],
+			"allTests": [
+				{
+					"Status 200": true,
+					"Has cart content": true
+				}
+			]
+		},
+		{
+			"id": "a3a5ea98-6229-4052-814a-557fe0692859",
+			"name": "POST Add to Cart (No Variant)",
+			"url": "http://127.0.0.1:8000/cart/add/",
+			"time": 355,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200 or 302": true,
+				"AJAX returns success field": true
+			},
+			"testPassFailCounts": {
+				"Status 200 or 302": {
+					"pass": 1,
+					"fail": 0
+				},
+				"AJAX returns success field": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				355
+			],
+			"allTests": [
+				{
+					"Status 200 or 302": true,
+					"AJAX returns success field": true
+				}
+			]
+		},
+		{
+			"id": "bbf3f5f0-92a8-4fd1-91c5-817d1b459e14",
+			"name": "POST Add to Cart (With Variant)",
+			"url": "http://127.0.0.1:8000/cart/add/",
+			"time": 312,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				312
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "57cdb1be-1669-4b71-b8bc-894db1b23dff",
+			"name": "POST Update Cart Quantity",
+			"url": "http://127.0.0.1:8000/cart/update/1/",
+			"time": 326,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200 or 302": true,
+				"Has success field": true,
+				"Has subtotal": true,
+				"Has total": true
+			},
+			"testPassFailCounts": {
+				"Status 200 or 302": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has success field": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has subtotal": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has total": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				326
+			],
+			"allTests": [
+				{
+					"Status 200 or 302": true,
+					"Has success field": true,
+					"Has subtotal": true,
+					"Has total": true
+				}
+			]
+		},
+		{
+			"id": "7075e280-37e6-4446-9139-e0a28163be43",
+			"name": "POST Update Cart — Quantity 0 (Should Fail)",
+			"url": "http://127.0.0.1:8000/cart/update/1/",
+			"time": 311,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Rejects quantity 0": true
+			},
+			"testPassFailCounts": {
+				"Rejects quantity 0": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				311
+			],
+			"allTests": [
+				{
+					"Rejects quantity 0": true
+				}
+			]
+		},
+		{
+			"id": "989136c7-6c62-4d86-9133-f23a114f8b39",
+			"name": "POST Remove from Cart",
+			"url": "http://127.0.0.1:8000/cart/remove/1/",
+			"time": 338,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Remove successful": true
+			},
+			"testPassFailCounts": {
+				"Remove successful": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				338
+			],
+			"allTests": [
+				{
+					"Remove successful": true
+				}
+			]
+		},
+		{
+			"id": "3be4e95e-e75b-48fc-84da-a246ae539ec7",
+			"name": "POST Apply Coupon — Valid",
+			"url": "http://127.0.0.1:8000/cart/apply-coupon/",
+			"time": 388,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true,
+				"Has status field": true,
+				"Has message": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has status field": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has message": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				388
+			],
+			"allTests": [
+				{
+					"Status 200": true,
+					"Has status field": true,
+					"Has message": true
+				}
+			]
+		},
+		{
+			"id": "0abf2bdb-2110-4901-bdbb-fb62583990d4",
+			"name": "POST Apply Coupon — Invalid Code",
+			"url": "http://127.0.0.1:8000/cart/apply-coupon/",
+			"time": 424,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Coupon rejected": true,
+				"Status is invalid": true
+			},
+			"testPassFailCounts": {
+				"Coupon rejected": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is invalid": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				424
+			],
+			"allTests": [
+				{
+					"Coupon rejected": true,
+					"Status is invalid": true
+				}
+			]
+		},
+		{
+			"id": "ca73b962-3da1-456f-b972-be19283cec5e",
+			"name": "POST Apply Coupon — Empty Code",
+			"url": "http://127.0.0.1:8000/cart/apply-coupon/",
+			"time": 251,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Empty code handled": true
+			},
+			"testPassFailCounts": {
+				"Empty code handled": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				251
+			],
+			"allTests": [
+				{
+					"Empty code handled": true
+				}
+			]
+		},
+		{
+			"id": "8556ecfd-cb7b-45c9-bec2-b9428726e061",
+			"name": "POST Remove Coupon",
+			"url": "http://127.0.0.1:8000/cart/apply-coupon/",
+			"time": 339,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				339
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "34a54c33-4f50-4278-bedb-b6693e1d2bf0",
+			"name": "GET Checkout Page",
+			"url": "http://127.0.0.1:8000/orders/checkout/",
+			"time": 440,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200 or 302": true
+			},
+			"testPassFailCounts": {
+				"Status 200 or 302": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				440
+			],
+			"allTests": [
+				{
+					"Status 200 or 302": true
+				}
+			]
+		},
+		{
+			"id": "9c5e929a-2283-4b03-be7a-390d4f56d73a",
+			"name": "POST Checkout — Submit Order",
+			"url": "http://127.0.0.1:8000/orders/checkout/",
+			"time": 314,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Checkout processed": true
+			},
+			"testPassFailCounts": {
+				"Checkout processed": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				314
+			],
+			"allTests": [
+				{
+					"Checkout processed": true
+				}
+			]
+		},
+		{
+			"id": "1dfc8327-8ffc-4f2a-ad48-e76c558fc55c",
+			"name": "GET My Orders",
+			"url": "http://127.0.0.1:8000/orders/my-orders/",
+			"time": 484,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200 or 302": true
+			},
+			"testPassFailCounts": {
+				"Status 200 or 302": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				484
+			],
+			"allTests": [
+				{
+					"Status 200 or 302": true
+				}
+			]
+		},
+		{
+			"id": "2bf6f318-69b6-43ef-b8d6-f3f1e723ac23",
+			"name": "GET Order Detail",
+			"url": "http://127.0.0.1:8000/orders/SP00000001/",
+			"time": 372,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status 200 or 302 or 404": true
+			},
+			"testPassFailCounts": {
+				"Status 200 or 302 or 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				372
+			],
+			"allTests": [
+				{
+					"Status 200 or 302 or 404": true
+				}
+			]
+		},
+		{
+			"id": "18ac560b-40f0-4e1a-9fce-07a8c9702cdf",
+			"name": "GET Download Invoice (PDF)",
+			"url": "http://127.0.0.1:8000/orders/SP00000001/invoice/",
+			"time": 308,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"PDF or redirect": true
+			},
+			"testPassFailCounts": {
+				"PDF or redirect": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				308
+			],
+			"allTests": [
+				{
+					"PDF or redirect": true
+				}
+			]
+		},
+		{
+			"id": "e1d6a98a-f82d-45ac-948b-378ccd2101c5",
+			"name": "GET Wishlist Page",
+			"url": "http://127.0.0.1:8000/wishlist/",
+			"time": 391,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200 or 302": true
+			},
+			"testPassFailCounts": {
+				"Status 200 or 302": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				391
+			],
+			"allTests": [
+				{
+					"Status 200 or 302": true
+				}
+			]
+		},
+		{
+			"id": "09ac1945-070e-4b19-9f23-da971d2e5819",
+			"name": "POST Toggle Wishlist — Add",
+			"url": "http://127.0.0.1:8000/wishlist/toggle/1/",
+			"time": 293,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true,
+				"Has in_wishlist field": true,
+				"Has count field": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has in_wishlist field": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Has count field": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				293
+			],
+			"allTests": [
+				{
+					"Status 200": true,
+					"Has in_wishlist field": true,
+					"Has count field": true
+				}
+			]
+		},
+		{
+			"id": "85e8e9e9-98a6-45cb-a528-ab38b8d6247f",
+			"name": "POST Toggle Wishlist — Remove (same product)",
+			"url": "http://127.0.0.1:8000/wishlist/toggle/1/",
+			"time": 385,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Toggled off": true
+			},
+			"testPassFailCounts": {
+				"Toggled off": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				385
+			],
+			"allTests": [
+				{
+					"Toggled off": true
+				}
+			]
+		},
+		{
+			"id": "2a6ef3b0-c2b4-4e84-9ec8-0a8d42e270bb",
+			"name": "POST Remove Wishlist Item by ID",
+			"url": "http://127.0.0.1:8000/wishlist/remove/1/",
+			"time": 310,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Status 200 or 302 or 404": true
+			},
+			"testPassFailCounts": {
+				"Status 200 or 302 or 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				310
+			],
+			"allTests": [
+				{
+					"Status 200 or 302 or 404": true
+				}
+			]
+		},
+		{
+			"id": "01aaeca0-46f2-4da5-bda2-e2728296d35f",
+			"name": "POST Clear Wishlist",
+			"url": "http://127.0.0.1:8000/wishlist/clear/",
+			"time": 255,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200": true,
+				"Wishlist cleared": true
+			},
+			"testPassFailCounts": {
+				"Status 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Wishlist cleared": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				255
+			],
+			"allTests": [
+				{
+					"Status 200": true,
+					"Wishlist cleared": true
+				}
+			]
+		},
+		{
+			"id": "20e582d4-39f4-4205-9a51-641fbe5d51d7",
+			"name": "POST Add Review",
+			"url": "http://127.0.0.1:8000/reviews/add/Women-Casual-Athletic-T-Shirt/",
+			"time": 498,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Review submitted or redirect": true
+			},
+			"testPassFailCounts": {
+				"Review submitted or redirect": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				498
+			],
+			"allTests": [
+				{
+					"Review submitted or redirect": true
+				}
+			]
+		},
+		{
+			"id": "ba1851ad-9172-448b-b0fe-f3029c907428",
+			"name": "POST Delete Review",
+			"url": "http://127.0.0.1:8000/reviews/delete/1/",
+			"time": 292,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Delete response": true
+			},
+			"testPassFailCounts": {
+				"Delete response": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				292
+			],
+			"allTests": [
+				{
+					"Delete response": true
+				}
+			]
+		},
+		{
+			"id": "b64e467c-b9fa-4da8-a9e8-f01b9a591706",
+			"name": "GET Support Tickets List",
+			"url": "http://127.0.0.1:8000/support/",
+			"time": 459,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Status 200 or 302": true
+			},
+			"testPassFailCounts": {
+				"Status 200 or 302": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				459
+			],
+			"allTests": [
+				{
+					"Status 200 or 302": true
+				}
+			]
+		},
+		{
+			"id": "cc8bc1af-cf9d-43e9-b4b4-03ae058a0f83",
+			"name": "GET Create Ticket Page",
+			"url": "http://127.0.0.1:8000/support/create/",
+			"time": 431,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				431
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "9364d345-ed28-4d61-a9f0-92919d390e80",
+			"name": "POST Create Support Ticket",
+			"url": "http://127.0.0.1:8000/support/create/",
+			"time": 413,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Ticket created": true
+			},
+			"testPassFailCounts": {
+				"Ticket created": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				413
+			],
+			"allTests": [
+				{
+					"Ticket created": true
+				}
+			]
+		},
+		{
+			"id": "2271fddf-7470-4fcb-b2cf-ef33b1977185",
+			"name": "GET Ticket Detail",
+			"url": "http://127.0.0.1:8000/support/1/",
+			"time": 388,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				388
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "a51922cf-3405-49e8-93a2-e40545efda3a",
+			"name": "POST Reply to Ticket",
+			"url": "http://127.0.0.1:8000/support/1/",
+			"time": 495,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				495
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "318e4538-f723-4bea-8ae8-5284ca8ce926",
+			"name": "GET Payment Cancel",
+			"url": "http://127.0.0.1:8000/payments/cancel/",
+			"time": 446,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				446
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "abb9bbde-6e73-4bc2-967e-9259ba0de729",
+			"name": "GET Payment Success (verify only)",
+			"url": "http://127.0.0.1:8000/payments/success/",
+			"time": 533,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Success page loads": true
+			},
+			"testPassFailCounts": {
+				"Success page loads": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				533
+			],
+			"allTests": [
+				{
+					"Success page loads": true
+				}
+			]
+		},
+		{
+			"id": "0ade470e-7c72-411b-a498-56da36e03f33",
+			"name": "GET Sitemap XML",
+			"url": "http://127.0.0.1:8000/sitemap.xml",
+			"time": 375,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Sitemap returns 200": true,
+				"Content-Type is XML": true,
+				"Contains urlset": true
+			},
+			"testPassFailCounts": {
+				"Sitemap returns 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is XML": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Contains urlset": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				375
+			],
+			"allTests": [
+				{
+					"Sitemap returns 200": true,
+					"Content-Type is XML": true,
+					"Contains urlset": true
+				}
+			]
+		},
+		{
+			"id": "8124c5c5-5017-40ee-9c5b-5e143eee451e",
+			"name": "GET Robots.txt",
+			"url": "http://127.0.0.1:8000/robots.txt",
+			"time": 245,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Robots.txt returns 200": true,
+				"Contains User-agent": true
+			},
+			"testPassFailCounts": {
+				"Robots.txt returns 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Contains User-agent": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				245
+			],
+			"allTests": [
+				{
+					"Robots.txt returns 200": true,
+					"Contains User-agent": true
+				}
+			]
+		},
+		{
+			"id": "360e56a3-74bb-4374-b7fc-ac4c68c5aacf",
+			"name": "GET 404 Page",
+			"url": "http://127.0.0.1:8000/this-page-does-not-exist-at-all-xyz/",
+			"time": 290,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {
+				"Returns 404": true
+			},
+			"testPassFailCounts": {
+				"Returns 404": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				290
+			],
+			"allTests": [
+				{
+					"Returns 404": true
+				}
+			]
+		},
+		{
+			"id": "677d0512-a045-4521-9ab1-7da469caac61",
+			"name": "POST Without CSRF — Should Fail (403)",
+			"url": "http://127.0.0.1:8000/cart/add/",
+			"time": 243,
+			"responseCode": {
+				"code": 403,
+				"name": "Forbidden"
+			},
+			"tests": {
+				"CSRF protection works (403)": true
+			},
+			"testPassFailCounts": {
+				"CSRF protection works (403)": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				243
+			],
+			"allTests": [
+				{
+					"CSRF protection works (403)": true
+				}
+			]
+		},
+		{
+			"id": "bf3f8b9f-6b0f-43cc-97ad-8336f0328ec0",
+			"name": "GET Admin Panel — Redirect if Not Staff",
+			"url": "http://127.0.0.1:8000/admin/",
+			"time": 426,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Admin requires authentication": true
+			},
+			"testPassFailCounts": {
+				"Admin requires authentication": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				426
+			],
+			"allTests": [
+				{
+					"Admin requires authentication": true
+				}
+			]
+		},
+		{
+			"id": "d9cde5a3-663d-4efe-9efe-5ce097d83131",
+			"name": "POST Logout",
+			"url": "http://127.0.0.1:8000/users/logout/",
+			"time": 447,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Logout successful (302)": true
+			},
+			"testPassFailCounts": {
+				"Logout successful (302)": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				447
+			],
+			"allTests": [
+				{
+					"Logout successful (302)": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 26697,
+	"collection": {
+		"requests": [
+			{
+				"id": "8d3067a1-d6a5-41a8-bbca-c62abd76e902",
+				"method": "GET"
+			},
+			{
+				"id": "a455ab70-ff1c-4161-829e-49126a48f94d",
+				"method": "GET"
+			},
+			{
+				"id": "54028e92-6a35-4615-98e0-991806ae4306",
+				"method": "POST"
+			},
+			{
+				"id": "a7b5d9b5-f38f-4081-a74e-c7e36debcbbd",
+				"method": "GET"
+			},
+			{
+				"id": "97d433b8-4dbd-4587-89e1-99d248fa26f2",
+				"method": "POST"
+			},
+			{
+				"id": "83086bfe-c9dd-4aa5-9b0b-daf59a30ab25",
+				"method": "POST"
+			},
+			{
+				"id": "e4a00fb7-81eb-4d02-84c7-2025e4dc2f67",
+				"method": "GET"
+			},
+			{
+				"id": "f94a0f7b-9486-4aad-8136-993b41c137c4",
+				"method": "GET"
+			},
+			{
+				"id": "fc308281-e32b-4b34-b791-6d5d7972b5fe",
+				"method": "POST"
+			},
+			{
+				"id": "28d23cf8-5d3b-4248-8c9c-b0cc11b26c40",
+				"method": "GET"
+			},
+			{
+				"id": "8986ccdb-3eda-40ca-8fb7-281693a842cd",
+				"method": "GET"
+			},
+			{
+				"id": "b53c5761-9cee-4afd-95ba-cf700ff8d5ed",
+				"method": "GET"
+			},
+			{
+				"id": "7c619c01-60e3-453a-97b1-1501bb6b149a",
+				"method": "GET"
+			},
+			{
+				"id": "e7eb4a02-d165-438a-86a9-b4e130b7c65f",
+				"method": "GET"
+			},
+			{
+				"id": "1d4ebd80-5d8e-4da1-ae39-47a5f020787c",
+				"method": "GET"
+			},
+			{
+				"id": "7af73f4e-c8c2-444c-9810-437f26764eff",
+				"method": "GET"
+			},
+			{
+				"id": "b84a86d4-b5ff-4887-b26d-3340b5cd8480",
+				"method": "GET"
+			},
+			{
+				"id": "04c7a595-f1bd-492f-8ddf-5201b2aabee2",
+				"method": "GET"
+			},
+			{
+				"id": "c4610714-13c8-4dd3-bf4d-43b4dc47def7",
+				"method": "GET"
+			},
+			{
+				"id": "676d4017-aa21-4932-a2e9-2f42cf4e6099",
+				"method": "GET"
+			},
+			{
+				"id": "5bc0e5ff-f0c2-450e-8e28-4f8a5e5edfcd",
+				"method": "GET"
+			},
+			{
+				"id": "88587293-4791-47c6-bdd8-e54129cc20e1",
+				"method": "GET"
+			},
+			{
+				"id": "644ba1b7-63f0-4ee2-b159-a5826ec4fe77",
+				"method": "GET"
+			},
+			{
+				"id": "a3a5ea98-6229-4052-814a-557fe0692859",
+				"method": "POST"
+			},
+			{
+				"id": "bbf3f5f0-92a8-4fd1-91c5-817d1b459e14",
+				"method": "POST"
+			},
+			{
+				"id": "57cdb1be-1669-4b71-b8bc-894db1b23dff",
+				"method": "POST"
+			},
+			{
+				"id": "7075e280-37e6-4446-9139-e0a28163be43",
+				"method": "POST"
+			},
+			{
+				"id": "989136c7-6c62-4d86-9133-f23a114f8b39",
+				"method": "POST"
+			},
+			{
+				"id": "3be4e95e-e75b-48fc-84da-a246ae539ec7",
+				"method": "POST"
+			},
+			{
+				"id": "0abf2bdb-2110-4901-bdbb-fb62583990d4",
+				"method": "POST"
+			},
+			{
+				"id": "ca73b962-3da1-456f-b972-be19283cec5e",
+				"method": "POST"
+			},
+			{
+				"id": "8556ecfd-cb7b-45c9-bec2-b9428726e061",
+				"method": "POST"
+			},
+			{
+				"id": "34a54c33-4f50-4278-bedb-b6693e1d2bf0",
+				"method": "GET"
+			},
+			{
+				"id": "9c5e929a-2283-4b03-be7a-390d4f56d73a",
+				"method": "POST"
+			},
+			{
+				"id": "1dfc8327-8ffc-4f2a-ad48-e76c558fc55c",
+				"method": "GET"
+			},
+			{
+				"id": "2bf6f318-69b6-43ef-b8d6-f3f1e723ac23",
+				"method": "GET"
+			},
+			{
+				"id": "18ac560b-40f0-4e1a-9fce-07a8c9702cdf",
+				"method": "GET"
+			},
+			{
+				"id": "e1d6a98a-f82d-45ac-948b-378ccd2101c5",
+				"method": "GET"
+			},
+			{
+				"id": "09ac1945-070e-4b19-9f23-da971d2e5819",
+				"method": "POST"
+			},
+			{
+				"id": "85e8e9e9-98a6-45cb-a528-ab38b8d6247f",
+				"method": "POST"
+			},
+			{
+				"id": "2a6ef3b0-c2b4-4e84-9ec8-0a8d42e270bb",
+				"method": "POST"
+			},
+			{
+				"id": "01aaeca0-46f2-4da5-bda2-e2728296d35f",
+				"method": "POST"
+			},
+			{
+				"id": "20e582d4-39f4-4205-9a51-641fbe5d51d7",
+				"method": "POST"
+			},
+			{
+				"id": "ba1851ad-9172-448b-b0fe-f3029c907428",
+				"method": "POST"
+			},
+			{
+				"id": "b64e467c-b9fa-4da8-a9e8-f01b9a591706",
+				"method": "GET"
+			},
+			{
+				"id": "cc8bc1af-cf9d-43e9-b4b4-03ae058a0f83",
+				"method": "GET"
+			},
+			{
+				"id": "9364d345-ed28-4d61-a9f0-92919d390e80",
+				"method": "POST"
+			},
+			{
+				"id": "2271fddf-7470-4fcb-b2cf-ef33b1977185",
+				"method": "GET"
+			},
+			{
+				"id": "a51922cf-3405-49e8-93a2-e40545efda3a",
+				"method": "POST"
+			},
+			{
+				"id": "318e4538-f723-4bea-8ae8-5284ca8ce926",
+				"method": "GET"
+			},
+			{
+				"id": "abb9bbde-6e73-4bc2-967e-9259ba0de729",
+				"method": "GET"
+			},
+			{
+				"id": "0ade470e-7c72-411b-a498-56da36e03f33",
+				"method": "GET"
+			},
+			{
+				"id": "8124c5c5-5017-40ee-9c5b-5e143eee451e",
+				"method": "GET"
+			},
+			{
+				"id": "360e56a3-74bb-4374-b7fc-ac4c68c5aacf",
+				"method": "GET"
+			},
+			{
+				"id": "677d0512-a045-4521-9ab1-7da469caac61",
+				"method": "POST"
+			},
+			{
+				"id": "bf3f8b9f-6b0f-43cc-97ad-8336f0328ec0",
+				"method": "GET"
+			},
+			{
+				"id": "d9cde5a3-663d-4efe-9efe-5ce097d83131",
+				"method": "POST"
+			}
+		]
+	}
+}
