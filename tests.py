@@ -172,7 +172,9 @@ class HomeViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/home.html')
 
-
+# =======================
+# Product List View Tests
+# =======================
 class ProductListViewTest(TestCase):
 
     def setUp(self):
@@ -196,7 +198,9 @@ class ProductListViewTest(TestCase):
         response = self.client.get(reverse('products:category', kwargs={'slug': 'sneakers'}))
         self.assertEqual(response.status_code, 200)
 
-
+# =========================
+# Product Detail View Tests
+# =========================
 class ProductDetailViewTest(TestCase):
 
     def setUp(self):
@@ -216,7 +220,9 @@ class ProductDetailViewTest(TestCase):
         response = self.client.get('/products/non-existent-slug/')
         self.assertEqual(response.status_code, 404)
 
-
+# ====================
+# User Auth Tests
+# ====================
 class UserAuthTest(TestCase):
 
     def setUp(self):
@@ -248,14 +254,18 @@ class UserAuthTest(TestCase):
         response = self.client.get(reverse('users:profile'))
         self.assertEqual(response.status_code, 200)
 
-
+# ====================
+# Cart View Tests
+# ====================
 class CartViewTest(TestCase):
 
     def test_cart_view_loads(self):
         response = self.client.get(reverse('cart:cart'))
         self.assertEqual(response.status_code, 200)
 
-
+# ====================
+# Wish List Tests
+# ====================
 class WishlistTest(TestCase):
 
     def setUp(self):
@@ -287,7 +297,9 @@ class WishlistTest(TestCase):
         )
         self.assertFalse(WishlistItem.objects.filter(user=self.user, product=self.product).exists())
 
-
+# ====================
+# Coupon Tests
+# ====================
 class CouponTest(TestCase):
 
     def setUp(self):
@@ -318,7 +330,9 @@ class CouponTest(TestCase):
         discount, msg = CouponService.apply_coupon('TEST20', Decimal('1000.00'))
         self.assertEqual(discount, 0)
 
-
+# ====================
+# Support Ticket Tests
+# ====================
 class SupportTicketTest(TestCase):
 
     def setUp(self):
