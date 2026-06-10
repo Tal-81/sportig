@@ -57,12 +57,12 @@
                                  data-item-id="{{ item.id }}"
                                  data-max-stock="{% if item.variant %}{{ item.variant.stock_quantity }}{% else %}{{ item.product.stock_quantity }}{% endif %}">
                                 
-                                 <button class="qty-btn-sm qty-btn-min" type="button"
+                                 <button class="qty-btn-sm qty-btn-min" type="button" aria-label="Decrease quantity"
                                         {% if item.quantity <= 1 %}disabled{% endif %}>
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span class="qty-val" id="qty-{{ item.id }}">{{ item.quantity }}</span>
-                                <button class="qty-btn-sm qty-btn-plus" type="button"
+                                <button class="qty-btn-sm qty-btn-plus" type="button" aria-label="Increase quantity"
                                         {% if item.variant %}{% if item.quantity >= item.variant.stock_quantity %}disabled{% endif %}
                                         {% else %}{% if item.quantity >= item.product.stock_quantity %}disabled{% endif %}{% endif %}>
                                     <i class="fas fa-plus"></i>
@@ -78,7 +78,7 @@
                             <!-- Remove -->
                             <form method="post" action="{% url 'cart:remove' item.id %}">
                                 {% csrf_token %}
-                                <button type="submit" class="cart-remove-btn" title="Remove">
+                                <button type="submit" class="cart-remove-btn" title="Remove" aria-label="Remove item">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </form>
@@ -98,23 +98,26 @@
                                placeholder="Enter coupon code"
                                value="{{ coupon_code|default:'' }}"
                                class="coupon-input"
+                               aria-label="Enter coupon code"
                                autocomplete="off"
                                maxlength="50">
                         <button type="button"
                                 class="btn-coupon"
-                                id="applyCouponBtn">
+                                id="applyCouponBtn"
+                                aria-label="Apply coupon">
                             Apply
                         </button>
                         {% if coupon_code %}
                         <button type="button"
                                 class="btn-coupon-remove"
-                                id="removeCouponBtn">
+                                id="removeCouponBtn"
+                                aria-label="Remove coupon">
                             <i class="fas fa-times"></i> Remove
                         </button>
                         {% endif %}
                     </div>
 
-                    <!-- Coupon Toast Area — رسائل الكوبون هنا -->
+                    <!-- Coupon Toast Area -->
                     <div id="couponFeedback" class="coupon-feedback" style="display:none;"></div>
 
                     {% if coupon_code and coupon_discount > 0 %}
@@ -439,7 +442,7 @@
                     activeBadge.style.display = 'flex';
                 }
 
-                // أضف زر Remove إذا لم يكن موجوداً
+                // add button Remove if not exists  
                 if (!removeBtn) {
                     const newRemoveBtn = document.createElement('button');
                     newRemoveBtn.type      = 'button';

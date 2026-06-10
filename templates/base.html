@@ -19,16 +19,30 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link   rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600;700&display=swap"
+        as="style"
+        onload="this.onload=null;this.rel='stylesheet'"
+        >
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- AOS Animations -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <link
+        rel="preload"
+        href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"
+        as="style"
+        onload="this.onload=null;this.rel='stylesheet'"
+        >
 
     <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <link
+        rel="preload"
+        href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+        as="style"
+        onload="this.onload=null;this.rel='stylesheet'"
+        >
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/main.css">
@@ -60,7 +74,7 @@
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }} alert-dismissible">
             <span>{{ message }}</span>
-            <button onclick="this.parentElement.remove()" class="close-alert">&times;</button>
+            <button onclick="this.parentElement.remove()" class="close-alert" aria-label="close">&times;</button>
         </div>
         {% endfor %}
     </div>
@@ -75,22 +89,24 @@
     {% include 'partials/footer.html' %}
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="/static/js/main.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script defer src="/static/js/main.js"></script>
 
     {% block extra_js %}{% endblock %}
 
     <script>
-        // Initialize AOS
-        AOS.init({ duration: 700, easing: 'ease-out', once: true, offset: 60 });
+        window.addEventListener("load", () => {
 
-        // Auto-dismiss messages after 4s
-        setTimeout(() => {
-            const container = document.getElementById('messagesContainer');
-            if (container) container.style.opacity = '0';
-            setTimeout(() => container && container.remove(), 500);
-        }, 4000);
+            if (typeof AOS !== "undefined") {
+                AOS.init({
+                    duration: 700,
+                    easing: 'ease-out',
+                    once: true,
+                    offset: 60
+                });
+            }
+        });
     </script>
 </body>
 </html>

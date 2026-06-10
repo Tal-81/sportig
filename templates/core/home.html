@@ -258,39 +258,57 @@
 
 {% block extra_js %}
 <script>
-// Hero Swiper
-new Swiper('.hero-swiper', {
-    loop: true,
-    autoplay: { delay: 5000, disableOnInteraction: false },
-    effect: 'fade',
-    fadeEffect: { crossFade: true },
-    pagination: { el: '.swiper-pagination', clickable: true },
-    navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-    speed: 800,
-});
+document.addEventListener("DOMContentLoaded", () => {
 
-// Categories Swiper
-new Swiper('.cats-swiper', {
-    slidesPerView: 'auto',
-    spaceBetween: 16,
-    freeMode: true,
-});
+    if (typeof Swiper !== "undefined") {
 
-// Products Swiper
-document.querySelectorAll('.products-swiper').forEach(el => {
-    new Swiper(el, {
-        slidesPerView: 1,
-        spaceBetween: 24,
-        navigation: {
-            nextEl: el.querySelector('.prod-next'),
-            prevEl: el.querySelector('.prod-prev'),
-        },
-        breakpoints: {
-            480: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 4 },
-        },
-    });
+        new Swiper('.hero-swiper', {
+            loop: true,
+            preloadImages: false,
+            updateOnWindowResize: false,
+            observer: false,
+            observeParents: false,        
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false
+            },
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev'
+            },
+            speed: 800
+        });
+
+        new Swiper('.cats-swiper', {
+            slidesPerView: 'auto',
+            spaceBetween: 16,
+            freeMode: true
+        });
+
+        document.querySelectorAll('.products-swiper').forEach(el => {
+            new Swiper(el, {
+                slidesPerView: 1,
+                spaceBetween: 24,
+                navigation: {
+                    nextEl: el.querySelector('.prod-next'),
+                    prevEl: el.querySelector('.prod-prev')
+                },
+                breakpoints: {
+                    480: { slidesPerView: 2 },
+                    768: { slidesPerView: 3 },
+                    1024: { slidesPerView: 4 }
+                }
+            });
+        });
+    }
 });
 
 // FAQ toggle

@@ -21,16 +21,17 @@
                 {% csrf_token %}
                 <button type="submit" class="quick-action-btn btn-wishlist wishlist-btn {% if product.id in wishlist_product_ids %}active{% endif %}" 
                         title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
-                        data-allow-double="true">
+                        data-allow-double="true"
+                        aria-label="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
                     <i class="fas fa-heart"></i>
                 </button>
             </form>
             {% else %}
-            <a href="{% url 'users:login' %}?next={{ product.get_absolute_url }}" class="quick-action-btn" title="Login to Wishlist">
+            <a href="{% url 'users:login' %}?next={{ product.get_absolute_url }}" class="quick-action-btn" title="Login to Wishlist" aria-label="Login to Wishlist">
                 <i class="fas fa-heart"></i>
             </a>
             {% endif %}
-            <a href="{{ product.get_absolute_url }}" class="quick-action-btn" title="Quick View">
+            <a href="{{ product.get_absolute_url }}" class="quick-action-btn" title="Quick View" aria-label="Quick View">
                 <i class="fas fa-eye"></i>
             </a>
         </div>

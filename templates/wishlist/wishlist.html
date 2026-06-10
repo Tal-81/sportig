@@ -42,7 +42,8 @@
                     {% csrf_token %}
                     <button type="submit"
                             class="quick-action-btn wishlist-btn active"
-                            title="Remove from Wishlist">
+                            title="Remove from Wishlist"
+                            aria-label="Remove {{ item.product.name }} from wishlist">
                         <i class="fas fa-heart"></i>
                     </button>
                 </form>
@@ -96,7 +97,8 @@
                           class="wishlist-remove-form"
                           data-card-id="wishlistCard-{{ item.id }}">
                         {% csrf_token %}
-                        <button type="submit" class="btn-remove-wishlist" title="Remove from Wishlist">
+                        <button type="submit" class="btn-remove-wishlist" 
+                            title="Remove from Wishlist" aria-label="Remove {{ item.product.name }} from wishlist">
                             <i class="fas fa-heart-broken"></i>
                             <span>Remove</span>
                         </button>

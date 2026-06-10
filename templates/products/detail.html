@@ -96,14 +96,16 @@
                         <button type="submit"
                                 class="btn-wishlist wishlist-btn {% if product.id in wishlist_product_ids %}active{% endif %}"
                                 title="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
-                                data-allow-double="true">
+                                data-allow-double="true"
+                                aria-label="{% if product.id in wishlist_product_ids %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
                             <i class="fas fa-heart"></i>
                         </button>
                     </form>
                     {% else %}
                     <a href="{% url 'users:login' %}?next={{ request.path }}"
                         class="btn-wishlist"
-                        title="Login to save">
+                        title="Login to save"
+                        aria-label="Login to save">
                         <i class="fas fa-heart"></i>
                     </a>
                     {% endif %}
@@ -147,11 +149,13 @@
                     <div class="variant-group">
                         <label class="variant-label">Quantity</label>
                         <div class="quantity-selector">
-                            <button type="button" class="qty-btn" onclick="changeQty(-1)">
+                            <button type="button" class="qty-btn" 
+                            onclick="changeQty(-1)" aria-label="Decrease quantity">
                                 <i class="fas fa-minus"></i>
                             </button>
                             <span class="qty-value" id="qtyDisplay">1</span>
-                            <button type="button" class="qty-btn" onclick="changeQty(1)">
+                            <button type="button" class="qty-btn" 
+                            onclick="changeQty(1)" aria-label="Increase quantity">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -176,11 +180,13 @@
                     <div class="variant-group">
                         <label class="variant-label">Quantity</label>
                         <div class="quantity-selector">
-                            <button type="button" class="qty-btn" onclick="changeQty(-1)">
+                            <button type="button" class="qty-btn" 
+                            onclick="changeQty(-1)" aria-label="Decrease quantity">
                                 <i class="fas fa-minus"></i>
                             </button>
                             <span class="qty-value" id="qtyDisplay">1</span>
-                            <button type="button" class="qty-btn" onclick="changeQty(1)">
+                            <button type="button" class="qty-btn" 
+                            onclick="changeQty(1)"  aria-label="Increase quantity">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -366,27 +372,57 @@
 
 {% block extra_js %}
 <script>
-// Gallery Swiper
-const thumbsSwiper = new Swiper('.thumbs-swiper', {
-    slidesPerView: 4,
-    spaceBetween: 8,
-    watchSlidesProgress: true,
-});
-new Swiper('.gallery-swiper', {
-    thumbs: { swiper: thumbsSwiper },
-});
+document.addEventListener("DOMContentLoaded", () => {
 
-// Related products swiper
-document.querySelectorAll('.products-swiper').forEach(el => {
-    new Swiper(el, {
-        slidesPerView: 2,
-        spaceBetween: 20,
-        navigation: {
-            nextEl: el.querySelector('.prod-next'),
-            prevEl: el.querySelector('.prod-prev'),
-        },
-        breakpoints: { 768: { slidesPerView: 3 }, 1024: { slidesPerView: 4 } },
-    });
+    if (typeof Swiper !== "undefined") {
+
+        new Swiper('.hero-swiper', {
+            loop: true,
+            preloadImages: false,
+            updateOnWindowResize: false,
+            observer: false,
+            observeParents: false,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false
+            },
+            effect: 'fade',
+            fadeEffect: {
+                crossFade: true
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev'
+            },
+            speed: 800
+        });
+
+        new Swiper('.cats-swiper', {
+            slidesPerView: 'auto',
+            spaceBetween: 16,
+            freeMode: true
+        });
+
+        document.querySelectorAll('.products-swiper').forEach(el => {
+            new Swiper(el, {
+                slidesPerView: 1,
+                spaceBetween: 24,
+                navigation: {
+                    nextEl: el.querySelector('.prod-next'),
+                    prevEl: el.querySelector('.prod-prev')
+                },
+                breakpoints: {
+                    480: { slidesPerView: 2 },
+                    768: { slidesPerView: 3 },
+                    1024: { slidesPerView: 4 }
+                }
+            });
+        });
+    }
 });
 
 // Quantity selector

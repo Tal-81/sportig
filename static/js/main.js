@@ -42,7 +42,7 @@ function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.className = `alert alert-${type}`;
   toast.innerHTML = `<span>${message}</span>
-    <button onclick="this.parentElement.remove()" class="close-alert">&times;</button>`;
+    <button onclick="this.parentElement.remove()" class="close-alert" aria-label="close">&times;</button>`;
   container.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0';

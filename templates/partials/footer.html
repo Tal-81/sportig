@@ -35,13 +35,13 @@
                 <div class="footer-col">
                     <h4>Help</h4>
                     <ul>
-                        <li><a href="{% url 'support:create' %}">Contact Us</a></li>
-                        <li><a href="{% url 'support:list' %}">My Tickets</a></li>
-                        <li><a href="{% url 'orders:list' %}">Track Order</a></li>
-                        <li><a href="#">Returns & Exchanges</a></li>
-                        <li><a href="#">Size Guide</a></li>
-                        <li><a href="#">Shipping Info</a></li>
-                        <li><a href="#">FAQ</a></li>
+                        <li><a href="{% url 'support:create' %}" aria-label="Contact Us">Contact Us</a></li>
+                        <li><a href="{% url 'support:list' %}" aria-label="My Tickets">My Tickets</a></li>
+                        <li><a href="{% url 'orders:list' %}" aria-label="Track Order">Track Order</a></li>
+                        <li><a href="#" aria-label="Returns & Exchanges">Returns & Exchanges</a></li>
+                        <li><a href="#" aria-label="Size Guide">Size Guide</a></li>
+                        <li><a href="#" aria-label="Shipping Info">Shipping Info</a></li>
+                        <li><a href="#" aria-label="FAQ">FAQ</a></li>
                     </ul>
                 </div>
 
@@ -50,14 +50,14 @@
                     <h4>Account</h4>
                     <ul>
                         {% if user.is_authenticated %}
-                        <li><a href="{% url 'users:profile' %}">My Profile</a></li>
-                        <li><a href="{% url 'orders:list' %}">My Orders</a></li>
-                        <li><a href="{% url 'wishlist:wishlist' %}">Wishlist</a></li>
-                        <li><a href="{% url 'users:edit_profile' %}">Edit Profile</a></li>
-                        <li><a href="{% url 'users:change_password' %}">Change Password</a></li>
+                        <li><a href="{% url 'users:profile' %}" aria-label="My Profile">My Profile</a></li>
+                        <li><a href="{% url 'orders:list' %}" aria-label="My Orders">My Orders</a></li>
+                        <li><a href="{% url 'wishlist:wishlist' %}" aria-label="Wishlist">Wishlist</a></li>
+                        <li><a href="{% url 'users:edit_profile' %}" aria-label="Edit Profile">Edit Profile</a></li>
+                        <li><a href="{% url 'users:change_password' %}" aria-label="Change Password">Change Password</a></li>
                         {% else %}
-                        <li><a href="{% url 'users:login' %}">Login</a></li>
-                        <li><a href="{% url 'users:register' %}">Create Account</a></li>
+                        <li><a href="{% url 'users:login' %}" aria-label="Login">Login</a></li>
+                        <li><a href="{% url 'users:register' %}" aria-label="Create Account">Create Account</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -70,7 +70,7 @@
                         {% csrf_token %}
                         <div class="newsletter-input-group">
                             <input type="email" name="email" placeholder="Your email address" required>
-                            <button type="submit">
+                            <button type="submit" aria-label="Subscribe to newsletter">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
