@@ -246,7 +246,7 @@
             <form class="newsletter-main-form" action="{% url 'core:newsletter_signup' %}" method="POST">
                 {% csrf_token %}
                 <div class="newsletter-main-group">
-                    <input type="email" name="email" placeholder="Enter your email address" required>
+                    <input type="email" name="email" placeholder="Enter your email address" autocomplete="email" required>
                     <button type="submit">Subscribe <i class="fas fa-arrow-right"></i></button>
                 </div>
             </form>
