@@ -715,9 +715,7 @@ textarea {
 }
 
 .section-header {
-  display: flex; 
-  align-items: flex-end; 
-  justify-content: space-between;
+  text-align: center;
   margin-bottom: 32px; 
   gap: 16px;
 }
@@ -997,9 +995,9 @@ textarea {
   letter-spacing: 1px; margin-bottom: 12px;
 }
 .promo-card-dark .promo-tag { color: rgba(255,255,255,0.7); }
-.promo-card-dark h3 { color: var(--white); }
+.promo-card-dark h2 { color: var(--white); }
 .promo-card-dark p { color: rgba(255,255,255,0.7); }
-.promo-card h3 { font-family: var(--font-condensed); font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
+.promo-card h2 { font-family: var(--font-condensed); font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; }
 .promo-card p { font-size: 14px; margin-bottom: 20px; opacity: 0.8; }
 .promo-btn {
   display: inline-flex; align-items: center; gap: 8px;
@@ -1083,7 +1081,7 @@ textarea {
   font-size: 14px; color: var(--white); transition: var(--transition);
 }
 .social-links a:hover { background: var(--white); color: var(--black); }
-.footer-col h4 {
+.footer-col h2 {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 1.5px; color: rgba(255,255,255,0.4); margin-bottom: 16px;
 }
@@ -2147,8 +2145,10 @@ textarea {
     align-items: center; 
   }
 
-  .section-header { 
-    flex-direction: column; 
+  .section-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     align-items: flex-start; 
     gap: 8px; 
   }

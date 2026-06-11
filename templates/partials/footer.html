@@ -19,7 +19,7 @@
 
                 <!-- Shop Links -->
                 <div class="footer-col">
-                    <h4>Shop</h4>
+                    <h2>Shop</h2>
                     <ul>
                         <li><a href="{% url 'products:list' %}?gender=men">Men</a></li>
                         <li><a href="{% url 'products:list' %}?gender=women">Women</a></li>
@@ -33,7 +33,7 @@
 
                 <!-- Help Links -->
                 <div class="footer-col">
-                    <h4>Help</h4>
+                    <h2>Help</h2>
                     <ul>
                         <li><a href="{% url 'support:create' %}" aria-label="Contact Us">Contact Us</a></li>
                         <li><a href="{% url 'support:list' %}" aria-label="My Tickets">My Tickets</a></li>
@@ -47,7 +47,7 @@
 
                 <!-- Account Links -->
                 <div class="footer-col">
-                    <h4>Account</h4>
+                    <h2>Account</h2>
                     <ul>
                         {% if user.is_authenticated %}
                         <li><a href="{% url 'users:profile' %}" aria-label="My Profile">My Profile</a></li>

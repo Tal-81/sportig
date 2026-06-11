@@ -39,7 +39,7 @@
 </section>
 
 <!-- Category Pills -->
-<section class="categories-strip">
+<div class="categories-strip">
     <div class="container">
         <div class="swiper cats-swiper">
             <div class="swiper-wrapper">
@@ -58,7 +58,7 @@
             </div>
         </div>
     </div>
-</section>
+</div>
 
 <!-- Featured Products -->
 {% if featured_products %}
@@ -91,7 +91,7 @@
             <div class="promo-card promo-card-dark">
                 <div class="promo-content">
                     <span class="promo-tag">Men's Collection</span>
-                    <h3>Built for Champions</h3>
+                    <h2>Built for Champions</h2>
                     <p>High-performance gear for every sport</p>
                     <a href="{% url 'products:list' %}?gender=men" class="promo-btn">Shop Men <i class="fas fa-arrow-right"></i></a>
                 </div>
@@ -99,7 +99,7 @@
             <div class="promo-card promo-card-light">
                 <div class="promo-content">
                     <span class="promo-tag">Women's Collection</span>
-                    <h3>Power Your Performance</h3>
+                    <h2>Power Your Performance</h2>
                     <p>Style meets serious athletic performance</p>
                     <a href="{% url 'products:list' %}?gender=women" class="promo-btn">Shop Women <i class="fas fa-arrow-right"></i></a>
                 </div>
@@ -107,7 +107,7 @@
             <div class="promo-card promo-card-accent">
                 <div class="promo-content">
                     <span class="promo-tag">Kids' Collection</span>
-                    <h3>Little Athletes</h3>
+                    <h2>Little Athletes</h2>
                     <p>Let them play, let them shine</p>
                     <a href="{% url 'products:list' %}?gender=kids" class="promo-btn">Shop Kids <i class="fas fa-arrow-right"></i></a>
                 </div>
