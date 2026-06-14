@@ -122,8 +122,7 @@ class PaymentSuccessView(View):
             try:
                 session = stripe.checkout.Session.retrieve(
                           order.stripe_session_id)
-                if session.payment_status == 'paid' and order.payment_status
-                != 'completed':
+                if session.payment_status == 'paid' and order.payment_status != 'completed':
                     _fulfill_order(order)
             except stripe.error.StripeError:
                 pass

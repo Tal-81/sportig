@@ -35,7 +35,7 @@ EFFECTIVE_PRICE_ANNOTATION = Case(
 
 
 def _annotate_effective_price(qs):
-    'Annotate a queryset with 'effective_price' (discount or regular price).'
+    "Annotate a queryset with 'effective_price' (discount or regular price)."
     return qs.annotate(effective_price=EFFECTIVE_PRICE_ANNOTATION)
 
 

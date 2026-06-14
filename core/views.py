@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.http import JsonResponse, HttpResponse
 
-from products.models import Product, Category, HeroBanner,
-NewsletterSubscription
+from products.models import (Product, Category, HeroBanner,
+                             NewsletterSubscription)
 
 
 class HomeView(View):

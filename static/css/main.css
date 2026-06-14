@@ -716,7 +716,7 @@ textarea {
 
 .section-header {
   text-align: center;
-  margin-bottom: 32px; 
+  margin-bottom: 25px; 
   gap: 16px;
 }
 
@@ -741,12 +741,14 @@ textarea {
   display: flex; 
   align-items: center; 
   gap: 6px;
+  width: fit-content;
   font-size: 13px; 
   font-weight: 700; 
   text-transform: uppercase;
   letter-spacing: 0.5px; 
   white-space: nowrap;
-  padding: 8px 16px; 
+  padding: 8px 16px;
+  margin-top: 25px;
   border: 2px solid var(--black);
   border-radius: var(--radius-sm); 
   transition: var(--transition);
@@ -1368,6 +1370,15 @@ textarea {
 .swiper-slide-thumb-active { 
   opacity: 1; 
 }
+
+.swiper-wrapper[aria-live="polite"] {
+  display: flex;
+  padding: 4px 0; 
+  overflow-x: auto; 
+  scrollbar-width: thin; 
+  scrollbar-color: var(--gray-300) transparent;
+}
+
 .thumbs-swiper img {
   width: 100%; 
   height: 80px; 

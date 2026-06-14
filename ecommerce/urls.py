@@ -27,8 +27,10 @@ urlpatterns = [
     path('wishlist/', include('wishlist.urls')),
     path('coupons/', include('coupons.urls')),
     path('support/', include('support.urls')),
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
-         name='django.contrib.sitemaps.view.sitema),
+    path('sitemap.xml',
+          sitemap,
+          {'sitemaps': sitemaps},
+          name='django.contrib.sitemaps.view.sitemap'),
 ]
 
 handler404 = 'core.views.error_404'
