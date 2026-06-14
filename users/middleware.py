@@ -27,7 +27,8 @@ class AutoLogoutMiddleware:
                 if elapsed > settings.SESSION_COOKIE_AGE:
                     logout(request)
                     request.session['session_expired'] = True
-                    return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+                    return redirect(
+                                  f"{settings.LOGIN_URL}?next={request.path}")
 
             request.session['last_activity'] = current_time
 
@@ -53,6 +54,8 @@ class SessionSecurityMiddleware:
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
 
         if not settings.DEBUG:
-            response['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
+            response['Strict-Transport-Security'] = (
+                'max-age=31536000; includeSubDomains; preload'
+            )
 
         return response

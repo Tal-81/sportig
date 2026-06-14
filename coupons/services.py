@@ -20,7 +20,12 @@ class CouponService:
         try:
             coupon = Coupon.objects.get(code=code)
         except Coupon.DoesNotExist:
-            return 0, f'Coupon "{code}" does not exist. Please check the code and try again.', 'invalid'
+            return (
+                0,
+                f'Coupon "{code}" does not exist. '
+                f'Please check the code and try again.',
+                'invalid'
+            )
 
         #   Is coupon active?
         if not coupon.is_active:
@@ -30,7 +35,13 @@ class CouponService:
 
         #   Is coupon valid from?
         if now < coupon.valid_from:
-            return 0, f'Coupon "{code}" is not valid yet. It starts on {coupon.valid_from.strftime("%d %b %Y")}.', 'invalid'
+            start_date = coupon.valid_from.strftime("%d %b %Y")
+            return (
+                0,
+                f'Coupon "{code}" is not valid yet. '
+                f'It starts on {start_date}.',
+                'invalid'
+            )
 
         #   Has coupon expired?
         if now > coupon.valid_to:
@@ -39,13 +50,17 @@ class CouponService:
 
         #   Has coupon reached its usage limit?
         if coupon.used_count >= coupon.max_uses:
-            return 0, f'Coupon "{code}" has reached its usage limit.', 'inactive'
+            return (
+                0,
+                f'Coupon "{code}" has reached its usage limit.', 'inactive'
+                )
 
-        #   Is order subtotal enough for this coupon? 
+        #   Is order subtotal enough for this coupon?
         if order_subtotal < coupon.min_order_amount:
             return (
                 0,
-                f'Minimum order amount for this coupon is {coupon.min_order_amount:,.0f} kr. '
+                f'Minimum order amount for this coupon is '
+                f'{coupon.min_order_amount:,.0f} kr. '
                 f'Your subtotal is {order_subtotal:,.0f} kr.',
                 'min_amount'
             )
@@ -54,6 +69,7 @@ class CouponService:
         discount = (order_subtotal * coupon.discount_percent) / 100
         return (
             discount,
-            f'Coupon "{code}" applied! You get {coupon.discount_percent}% off — saving {discount:,.0f} kr.',
+            f'Coupon "{code}" applied! You get {coupon.discount_percent}% '
+            f'off — saving {discount:,.0f} kr.',
             'success'
         )

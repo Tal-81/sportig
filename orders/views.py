@@ -23,22 +23,22 @@ class CheckoutView(View):
         user = request.user
         if user.has_complete_address():
             initial = {
-                'first_name':  user.first_name,
-                'last_name':   user.last_name,
-                'email':       user.email,
-                'phone':       user.phone_number,
-                'street':      user.street_name,
-                'building':    user.building_number,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'phone': user.phone_number,
+                'street': user.street_name,
+                'building': user.building_number,
                 'postal_code': user.postal_code,
-                'city':        user.city,
-                'country':     user.country,
+                'city': user.city,
+                'country': user.country,
             }
 
         coupon_discount = 0
-        coupon_code     = request.session.get('coupon_code')
+        coupon_code = request.session.get('coupon_code')
         if coupon_code:
             from coupons.services import CouponService
-            # ← يُرجع 3 قيم الآن
+            # ←  return 3 values
             discount, message, status = CouponService.apply_coupon(
                 coupon_code, cart['subtotal']
             )
@@ -47,12 +47,12 @@ class CheckoutView(View):
 
         form = CheckoutForm(initial=initial)
         return render(request, self.template_name, {
-            'cart':                 cart,
-            'form':                 form,
-            'coupon_discount':      coupon_discount,
-            'coupon_code':          coupon_code,
+            'cart': cart,
+            'form': form,
+            'coupon_discount': coupon_discount,
+            'coupon_code': coupon_code,
             'total_after_discount': cart['total'] - coupon_discount,
-            'page_title':           'Checkout',
+            'page_title': 'Checkout',
         })
 
     def post(self, request):
@@ -63,10 +63,10 @@ class CheckoutView(View):
         form = CheckoutForm(request.POST)
         if form.is_valid():
             coupon_discount = 0
-            coupon_code     = request.session.get('coupon_code')
+            coupon_code = request.session.get('coupon_code')
             if coupon_code:
                 from coupons.services import CouponService
-                # ← يُرجع 3 قيم الآن
+                # ← return 3 values
                 discount, message, status = CouponService.apply_coupon(
                     coupon_code, cart['subtotal']
                 )
@@ -98,14 +98,23 @@ class CheckoutView(View):
                 for item in cart['items']:
                     variant_info = ''
                     if item['variant']:
-                        variant_info = f"{item['variant'].color} / {item['variant'].size}"
+                        variant_info = (
+                            f"{item['variant'].color} / "
+                            f"{item['variant'].size}"
+                        )
+
+                    sku = (
+                        item['variant'].sku
+                        if item['variant']
+                        else ''
+                    )
 
                     OrderItem.objects.create(
                         order=order,
                         product=item['product'],
                         variant=item['variant'],
                         product_name=item['product'].name,
-                        product_sku=item['variant'].sku if item['variant'] else '',
+                        product_sku=sku,
                         variant_info=variant_info,
                         unit_price=item['unit_price'],
                         quantity=item['quantity'],
@@ -116,7 +125,7 @@ class CheckoutView(View):
 
         # إعادة عرض النموذج مع الأخطاء
         coupon_discount = 0
-        coupon_code     = request.session.get('coupon_code')
+        coupon_code = request.session.get('coupon_code')
         if coupon_code:
             from coupons.services import CouponService
             discount, message, status = CouponService.apply_coupon(
@@ -126,12 +135,12 @@ class CheckoutView(View):
                 coupon_discount = discount
 
         return render(request, self.template_name, {
-            'cart':                 cart,
-            'form':                 form,
-            'coupon_discount':      coupon_discount,
-            'coupon_code':          coupon_code,
+            'cart': cart,
+            'form': form,
+            'coupon_discount': coupon_discount,
+            'coupon_code': coupon_code,
             'total_after_discount': cart['total'] - coupon_discount,
-            'page_title':           'Checkout',
+            'page_title': 'Checkout',
         })
 
 
@@ -144,7 +153,7 @@ class OrderListView(View):
             user=request.user
         ).prefetch_related('items').order_by('-created_at')
         return render(request, self.template_name, {
-            'orders':     orders,
+            'orders': orders,
             'page_title': 'My Orders',
         })
 
@@ -155,12 +164,14 @@ class OrderDetailView(View):
 
     def get(self, request, order_number):
         order = get_object_or_404(
-            Order.objects.prefetch_related('items__product', 'items__variant'),
+            Order.objects.prefetch_related(
+                'items__product', 'items__variant'
+            ),
             order_number=order_number,
             user=request.user,
         )
         return render(request, self.template_name, {
-            'order':      order,
+            'order': order,
             'page_title': f'Order #{order.order_number}',
         })
 
@@ -175,7 +186,9 @@ class DownloadInvoiceView(View):
             user=request.user,
         )
         if order.payment_status != 'completed':
-            messages.error(request, 'Invoice only available for paid orders.')
+            messages.error(
+                request, 'Invoice only available for paid orders.'
+            )
             return redirect('orders:detail', order_number=order_number)
 
         from services.pdf_service import generate_invoice_pdf

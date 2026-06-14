@@ -1,5 +1,13 @@
 from django.contrib import admin
-from .models import Category, Brand, Product, ProductImage, ProductVariant, HeroBanner, NewsletterSubscription
+from .models import (
+                        Category,
+                        Brand,
+                        Product,
+                        ProductImage,
+                        ProductVariant,
+                        HeroBanner,
+                        NewsletterSubscription
+                    )
 
 
 class ProductImageInline(admin.TabularInline):
@@ -28,18 +36,23 @@ class BrandAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'brand', 'price', 'discount_price', 'stock_quantity',
-                    'is_featured', 'is_active', 'sales_count', 'created_at']
+    list_display = [
+                   'name', 'category', 'brand', 'price', 'discount_price',
+                   'stock_quantity', 'is_featured', 'is_active', 'sales_count',
+                   'created_at'
+                   ]
     list_filter = ['is_active', 'is_featured', 'category', 'brand', 'gender']
     search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
     list_editable = ['is_featured', 'is_active', 'price', 'stock_quantity']
     inlines = [ProductImageInline, ProductVariantInline]
-    readonly_fields = ['views_count', 'sales_count', 'created_at', 'updated_at']
+    readonly_fields = [
+                      'views_count', 'sales_count', 'created_at', 'updated_at']
 
     fieldsets = (
         ('Basic Info', {
-            'fields': ('name', 'slug', 'description', 'category', 'brand', 'gender')
+            'fields': (
+                'name', 'slug', 'description', 'category', 'brand', 'gender')
         }),
         ('Pricing', {
             'fields': ('price', 'discount_price')
@@ -55,7 +68,8 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Stats', {
-            'fields': ('views_count', 'sales_count', 'created_at', 'updated_at'),
+            'fields': (
+                'views_count', 'sales_count', 'created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )

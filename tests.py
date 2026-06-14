@@ -2,6 +2,7 @@ from decimal import Decimal
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from products.models import Product, Category, Brand, ProductVariant
 from cart.models import Cart, CartItem
@@ -10,7 +11,6 @@ from reviews.models import Review
 from wishlist.models import WishlistItem
 from coupons.models import Coupon
 from support.models import SupportTicket
-from django.utils import timezone
 
 User = get_user_model()
 
@@ -37,9 +37,11 @@ class UserModelTest(TestCase):
     def test_user_can_delete_account(self):
         self.assertTrue(self.user.can_delete_account())
 
-    def test_admin_cannot_delete_account(self):        
+    def test_admin_cannot_delete_account(self):
         admin = User.objects.create_superuser(
-            username='admin', email='admin@example.com', password='Admin123!'
+            username='admin',
+            email='admin@example.com',
+            password='Admin123!'
         )
         self.assertFalse(admin.can_delete_account())
 
@@ -70,7 +72,9 @@ class UserModelTest(TestCase):
 class ProductModelTest(TestCase):
 
     def setUp(self):
-        self.category = Category.objects.create(name='Sneakers', slug='sneakers')
+        self.category = Category.objects.create(
+            name='Sneakers', slug='sneakers'
+        )
         self.brand = Brand.objects.create(name='Nike', slug='nike')
         self.product = Product.objects.create(
             name='Air Max 90',
@@ -139,8 +143,12 @@ class CartServiceTest(TestCase):
         )
         self.category = Category.objects.create(name='Test', slug='test')
         self.product = Product.objects.create(
-            name='Test Shoe', slug='test-shoe', description='Test',
-            price=Decimal('500.00'), category=self.category, stock_quantity=20
+            name='Test Shoe',
+            slug='test-shoe',
+            description='Test',
+            price=Decimal('500.00'),
+            category=self.category,
+            stock_quantity=20,
         )
         self.client = Client()
 
@@ -151,7 +159,9 @@ class CartServiceTest(TestCase):
         request.user = self.user
         request.session = self.client.session
 
-        success, msg = CartService.add_item(request, self.product.id, quantity=2)
+        success, msg = CartService.add_item(
+            request, self.product.id, quantity=2
+        )
         self.assertTrue(success)
         cart = Cart.objects.get(user=self.user)
         self.assertEqual(cart.items.first().quantity, 2)
@@ -179,12 +189,17 @@ class HomeViewTest(TestCase):
 class ProductListViewTest(TestCase):
 
     def setUp(self):
-        self.category = Category.objects.create(name='Sneakers', slug='sneakers')
+        self.category = Category.objects.create(
+            name='Sneakers', slug='sneakers'
+        )
         for i in range(5):
             Product.objects.create(
-                name=f'Product {i}', slug=f'product-{i}',
-                description='Test', price=Decimal('299.00'),
-                category=self.category, stock_quantity=10
+                name=f'Product {i}',
+                slug=f'product-{i}',
+                description='Test',
+                price=Decimal('299.00'),
+                category=self.category,
+                stock_quantity=10,
             )
 
     def test_product_list_loads(self):
@@ -196,7 +211,9 @@ class ProductListViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_product_category_filter(self):
-        response = self.client.get(reverse('products:category', kwargs={'slug': 'sneakers'}))
+        response = self.client.get(
+            reverse('products:category', kwargs={'slug': 'sneakers'})
+        )
         self.assertEqual(response.status_code, 200)
 
 
@@ -208,9 +225,12 @@ class ProductDetailViewTest(TestCase):
     def setUp(self):
         self.category = Category.objects.create(name='Test', slug='test-cat')
         self.product = Product.objects.create(
-            name='Detail Product', slug='detail-product',
-            description='A test product', price=Decimal('799.00'),
-            category=self.category, stock_quantity=5
+            name='Detail Product',
+            slug='detail-product',
+            description='A test product',
+            price=Decimal('799.00'),
+            category=self.category,
+            stock_quantity=5,
         )
 
     def test_product_detail_loads(self):
@@ -250,7 +270,10 @@ class UserAuthTest(TestCase):
 
     def test_profile_requires_login(self):
         response = self.client.get(reverse('users:profile'))
-        self.assertRedirects(response, f"{reverse('users:login')}?next={reverse('users:profile')}")
+        expected_url = (
+            f"{reverse('users:login')}?next={reverse('users:profile')}"
+        )
+        self.assertRedirects(response, expected_url)
 
     def test_profile_authenticated(self):
         self.client.login(email='auth@test.com', password='Auth1234!')
@@ -277,11 +300,16 @@ class WishlistTest(TestCase):
         self.user = User.objects.create_user(
             username='wishuser', email='wish@test.com', password='Wish1234!'
         )
-        self.category = Category.objects.create(name='Test', slug='test-wish')
+        self.category = Category.objects.create(
+            name='Test', slug='test-wish'
+        )
         self.product = Product.objects.create(
-            name='Wish Product', slug='wish-product',
-            description='Test', price=Decimal('299.00'),
-            category=self.category, stock_quantity=5
+            name='Wish Product',
+            slug='wish-product',
+            description='Test',
+            price=Decimal('299.00'),
+            category=self.category,
+            stock_quantity=5,
         )
 
     def test_toggle_wishlist_add(self):
@@ -291,7 +319,11 @@ class WishlistTest(TestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(WishlistItem.objects.filter(user=self.user, product=self.product).exists())
+        self.assertTrue(
+            WishlistItem.objects.filter(
+                user=self.user, product=self.product
+            ).exists()
+        )
 
     def test_toggle_wishlist_remove(self):
         WishlistItem.objects.create(user=self.user, product=self.product)
@@ -300,7 +332,11 @@ class WishlistTest(TestCase):
             reverse('wishlist:toggle', kwargs={'product_id': self.product.id}),
             HTTP_X_REQUESTED_WITH='XMLHttpRequest'
         )
-        self.assertFalse(WishlistItem.objects.filter(user=self.user, product=self.product).exists())
+        self.assertFalse(
+            WishlistItem.objects.filter(
+                user=self.user, product=self.product
+            ).exists()
+        )
 
 
 # ====================
@@ -320,20 +356,27 @@ class CouponTest(TestCase):
 
     def test_valid_coupon(self):
         from coupons.services import CouponService
-        discount, msg = CouponService.apply_coupon('TEST20', Decimal('1000.00'))
+        # تحديث لاستقبال المتغيرات الثلاثة ليتوافق مع تعديل الخدمة
+        discount, msg, status = CouponService.apply_coupon(
+            'TEST20', Decimal('1000.00')
+        )
         self.assertEqual(discount, Decimal('200.00'))
 
     def test_invalid_coupon_code(self):
         from coupons.services import CouponService
-        discount, msg = CouponService.apply_coupon('INVALID', Decimal('1000.00'))
+        discount, msg, status = CouponService.apply_coupon(
+            'INVALID', Decimal('1000.00')
+        )
         self.assertEqual(discount, 0)
-        self.assertIn('Invalid', msg)
+        self.assertIn('does not exist', msg)
 
     def test_expired_coupon(self):
         from coupons.services import CouponService
         self.coupon.valid_to = timezone.now() - timezone.timedelta(days=1)
         self.coupon.save()
-        discount, msg = CouponService.apply_coupon('TEST20', Decimal('1000.00'))
+        discount, msg, status = CouponService.apply_coupon(
+            'TEST20', Decimal('1000.00')
+        )
         self.assertEqual(discount, 0)
 
 
@@ -344,7 +387,9 @@ class SupportTicketTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(
-            username='supportuser', email='support@test.com', password='Sup1234!'
+            username='supportuser',
+            email='support@test.com',
+            password='Sup1234!'
         )
         self.client.login(email='support@test.com', password='Sup1234!')
 
@@ -354,7 +399,9 @@ class SupportTicketTest(TestCase):
             'message': 'This is a test support message.',
         })
         self.assertEqual(SupportTicket.objects.count(), 1)
-        self.assertEqual(SupportTicket.objects.first().subject, 'Test Issue')
+        self.assertEqual(
+            SupportTicket.objects.first().subject, 'Test Issue'
+        )
 
     def test_ticket_list_view(self):
         response = self.client.get(reverse('support:list'))

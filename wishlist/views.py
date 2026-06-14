@@ -24,10 +24,9 @@ class WishlistView(View):
 
 @method_decorator(login_required, name='dispatch')
 class ToggleWishlistView(View):
-    """يضيف المنتج إذا غير موجود، يحذفه إذا موجود."""
-
+    """ add product if not exists, remove it if exists """
     def post(self, request, product_id):
-        product  = get_object_or_404(Product, id=product_id, is_active=True)
+        product = get_object_or_404(Product, id=product_id, is_active=True)
         existing = WishlistItem.objects.filter(
             user=request.user, product=product
         ).first()
@@ -41,15 +40,17 @@ class ToggleWishlistView(View):
 
         count = WishlistItem.objects.filter(user=request.user).count()
         return JsonResponse({
-            'success':     True,
+            'success': True,
             'in_wishlist': in_wishlist,
-            'count':       count,
+            'count': count,
         })
 
 
 @method_decorator(login_required, name='dispatch')
 class RemoveFromWishlistView(View):
-    """يحذف عنصراً واحداً بـ WishlistItem.id — يُستدعى من زر Remove في الكارد."""
+    """
+    remove one item from wishlist by its ID — calls button (Remove) in the card
+    """
 
     def post(self, request, item_id):
         item = get_object_or_404(WishlistItem, id=item_id, user=request.user)
@@ -60,7 +61,7 @@ class RemoveFromWishlistView(View):
 
 @method_decorator(login_required, name='dispatch')
 class ClearWishlistView(View):
-    """يحذف كل عناصر الـ wishlist."""
+    """  clear all items from wishlist."""
 
     def post(self, request):
         deleted, _ = WishlistItem.objects.filter(user=request.user).delete()

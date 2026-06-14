@@ -10,7 +10,8 @@ class Coupon(models.Model):
     discount_percent = models.PositiveIntegerField()  # e.g. 10 = 10%
     valid_from = models.DateTimeField()
     valid_to = models.DateTimeField()
-    min_order_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    min_order_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0)
     max_uses = models.PositiveIntegerField(default=100)
     used_count = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)

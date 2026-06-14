@@ -54,10 +54,14 @@ class CartService:
 
         for key, item_data in session_cart.items():
             try:
-                product = Product.objects.get(id=item_data['product_id'], is_active=True)
+                product = Product.objects.get(
+                    id=item_data['product_id'], is_active=True
+                )
                 variant = None
                 if item_data.get('variant_id'):
-                    variant = ProductVariant.objects.get(id=item_data['variant_id'])
+                    variant = ProductVariant.objects.get(
+                        id=item_data['variant_id']
+                    )
                 quantity = item_data['quantity']
                 unit_price = product.current_price
                 line_total = unit_price * quantity
@@ -94,18 +98,26 @@ class CartService:
         variant = None
         if variant_id:
             try:
-                variant = ProductVariant.objects.get(id=variant_id, product=product)
+                variant = ProductVariant.objects.get(
+                    id=variant_id, product=product
+                )
             except ProductVariant.DoesNotExist:
                 return False, 'Variant not found.'
 
         # Stock check
-        stock = variant.stock_quantity if variant else product.stock_quantity
+        stock = (
+            variant.stock_quantity if variant else product.stock_quantity
+        )
         if quantity > stock:
             return False, f'Only {stock} items available in stock.'
 
         if request.user.is_authenticated:
-            return CartService._add_to_db_cart(request.user, product, variant, quantity)
-        return CartService._add_to_session_cart(request, product, variant, quantity)
+            return CartService._add_to_db_cart(
+                request.user, product, variant, quantity
+            )
+        return CartService._add_to_session_cart(
+            request, product, variant, quantity
+        )
 
     @staticmethod
     @transaction.atomic
@@ -116,7 +128,9 @@ class CartService:
             defaults={'quantity': 0}
         )
         new_qty = item.quantity + quantity
-        stock = variant.stock_quantity if variant else product.stock_quantity
+        stock = (
+            variant.stock_quantity if variant else product.stock_quantity
+        )
         if new_qty > stock:
             return False, f'Cannot add more. Only {stock} available.'
         item.quantity = new_qty
@@ -129,7 +143,9 @@ class CartService:
         key = f"{product.id}_{variant.id if variant else 'none'}"
         if key in cart:
             new_qty = cart[key]['quantity'] + quantity
-            stock = variant.stock_quantity if variant else product.stock_quantity
+            stock = (
+                variant.stock_quantity if variant else product.stock_quantity
+            )
             if new_qty > stock:
                 return False, f'Cannot add more. Only {stock} available.'
             cart[key]['quantity'] = new_qty
@@ -147,7 +163,9 @@ class CartService:
     def remove_item(request, item_id):
         """Remove item from cart."""
         if request.user.is_authenticated:
-            CartItem.objects.filter(id=item_id, cart__user=request.user).delete()
+            CartItem.objects.filter(
+                id=item_id, cart__user=request.user
+            ).delete()
         else:
             cart = request.session.get('cart', {})
             cart.pop(str(item_id), None)
@@ -163,8 +181,14 @@ class CartService:
 
         if request.user.is_authenticated:
             try:
-                item = CartItem.objects.get(id=item_id, cart__user=request.user)
-                stock = item.variant.stock_quantity if item.variant else item.product.stock_quantity
+                item = CartItem.objects.get(
+                    id=item_id, cart__user=request.user
+                )
+                stock = (
+                    item.variant.stock_quantity
+                    if item.variant
+                    else item.product.stock_quantity
+                )
                 if quantity > stock:
                     return False, f'Only {stock} available.'
                 item.quantity = quantity
@@ -204,7 +228,9 @@ class CartService:
                 product = Product.objects.get(id=item_data['product_id'])
                 variant = None
                 if item_data.get('variant_id'):
-                    variant = ProductVariant.objects.get(id=item_data['variant_id'])
+                    variant = ProductVariant.objects.get(
+                        id=item_data['variant_id']
+                    )
 
                 item, created = CartItem.objects.get_or_create(
                     cart=db_cart, product=product, variant=variant,

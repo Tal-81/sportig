@@ -1,12 +1,9 @@
-"""Core views: homepage, FAQ, newsletter, error pages."""
-
 from django.shortcuts import render, redirect
 from django.views import View
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.http import require_POST
-from django.contrib.sitemaps import Sitemap
 
-from products.models import Product, Category, HeroBanner, NewsletterSubscription
+from products.models import Product, Category, HeroBanner,
+NewsletterSubscription
 
 
 class HomeView(View):
@@ -35,31 +32,57 @@ class HomeView(View):
         faqs = [
             {
                 'question': 'What is the delivery time?',
-                'answer': 'All orders are delivered within 3–5 business days across Sweden. International shipping may take longer.'
+                'answer': (
+                    'All orders are delivered within 3–5 business days '
+                    'across Sweden. International shipping may take longer.'
+                )
             },
             {
                 'question': 'What is the shipping cost?',
-                'answer': 'We offer a flat shipping rate of 100 kr for all orders. Free shipping is available during special promotions.'
+                'answer': (
+                    'We offer a flat shipping rate of 100 kr for all orders. '
+                    'Free shipping is available during special promotions.'
+                )
             },
             {
                 'question': 'Can I return or exchange a product?',
-                'answer': 'Yes! We offer a 30-day return policy. Items must be in their original condition with tags attached. Contact our support team to initiate a return.'
+                'answer': (
+                    'Yes! We offer a 30-day return policy. Items must be in '
+                    'their original condition with tags attached. Contact our '
+                    'support team to initiate a return.'
+                )
             },
             {
                 'question': 'How do I track my order?',
-                'answer': 'Once your order is shipped, you will receive a confirmation email with a tracking number. You can also view your order status in your account dashboard.'
+                'answer': (
+                    'Once your order is shipped, you will receive a '
+                    'confirmation email with a tracking number. You can also '
+                    'view your order status in your account dashboard.'
+                )
             },
             {
                 'question': 'Are your products authentic?',
-                'answer': 'Absolutely. We only stock genuine products from authorized brand suppliers. Every item is 100% authentic and comes with original packaging.'
+                'answer': (
+                    'Absolutely. We only stock genuine products from '
+                    'authorized brand suppliers. Every item is 100% authentic '
+                    'and comes with original packaging.'
+                )
             },
             {
                 'question': 'What payment methods do you accept?',
-                'answer': 'We accept all major credit and debit cards including Visa, Mastercard, and American Express through our secure Stripe payment gateway.'
+                'answer': (
+                    'We accept all major credit and debit cards including '
+                    'Visa, Mastercard, and American Express through our '
+                    'secure Stripe payment gateway.'
+                )
             },
             {
                 'question': 'How can I contact customer support?',
-                'answer': 'You can reach us through our support ticket system in your account, or email us directly. Our team responds within 24 hours on business days.'
+                'answer': (
+                    'You can reach us through our support ticket system in '
+                    'your account, or email us directly. Our team responds '
+                    'within 24 hours on business days.'
+                )
             },
         ]
 
@@ -82,7 +105,10 @@ class NewsletterSignupView(View):
             NewsletterSubscription.objects.get_or_create(email=email)
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': True, 'message': 'Thanks for subscribing!'})
+            return JsonResponse({
+                'success': True,
+                'message': 'Thanks for subscribing!'
+            })
 
         return redirect(request.META.get('HTTP_REFERER', '/'))
 

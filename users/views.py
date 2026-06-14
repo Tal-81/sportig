@@ -1,14 +1,12 @@
-"""
-Views for user authentication and profile management.
-"""
-
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
+from django.contrib.auth import (login, logout, authenticate,
+                                 update_session_auth_hash)
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views import View
 from django.utils.decorators import method_decorator
-from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
+from django.contrib.auth.views import (PasswordResetView,
+                                       PasswordResetConfirmView)
 from django.urls import reverse_lazy
 from django.db import transaction
 
@@ -34,7 +32,11 @@ class RegisterView(View):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f'Welcome to Sportig, {user.first_name}! Your account has been created.')
+            messages.success(
+                request,
+                f'Welcome to Sportig, {user.first_name}! '
+                f'Your account has been created.'
+            )
             return redirect('core:home')
         return render(request, self.template_name, {'form': form})
 
@@ -90,7 +92,8 @@ class EditProfileView(View):
         return render(request, self.template_name, {'form': form})
 
     def post(self, request):
-        form = UserProfileForm(request.POST, request.FILES, instance=request.user)
+        form = UserProfileForm(
+            request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
             return redirect('users:profile')
@@ -130,7 +133,8 @@ class DeleteAccountView(View):
         form = DeleteAccountForm(request.POST)
         if form.is_valid():
             password = form.cleaned_data['password']
-            user = authenticate(request, email=request.user.email, password=password)
+            user = authenticate(
+                request, email=request.user.email, password=password)
             if user:
                 logout(request)
                 with transaction.atomic():

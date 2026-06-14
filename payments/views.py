@@ -40,7 +40,8 @@ class StripeCheckoutView(View):
                         'name': item.product_name,
                         'description': item.variant_info or None,
                     },
-                    'unit_amount': int(item.unit_price * 100),  # Convert to öre
+                    # Convert to öre
+                    'unit_amount': int(item.unit_price * 100),
                 },
                 'quantity': item.quantity,
             })
@@ -73,7 +74,9 @@ class StripeCheckoutView(View):
                     'order_number': order.order_number,
                 },
                 # Apply coupon discount if any
-                discounts=[{'coupon': _create_stripe_coupon(order.discount_amount)}]
+                discounts=[
+                    {'coupon': _create_stripe_coupon(order.discount_amount)}
+                    ]
                 if order.discount_amount > 0 else [],
             )
 
@@ -117,8 +120,10 @@ class PaymentSuccessView(View):
         # Verify payment via session (security check)
         if order.stripe_session_id:
             try:
-                session = stripe.checkout.Session.retrieve(order.stripe_session_id)
-                if session.payment_status == 'paid' and order.payment_status != 'completed':
+                session = stripe.checkout.Session.retrieve(
+                          order.stripe_session_id)
+                if session.payment_status == 'paid' and order.payment_status
+                != 'completed':
                     _fulfill_order(order)
             except stripe.error.StripeError:
                 pass
@@ -142,7 +147,8 @@ class PaymentCancelView(View):
         order = None
         if order_number:
             try:
-                order = Order.objects.get(order_number=order_number, user=request.user)
+                order = Order.objects.get(
+                    order_number=order_number, user=request.user)
             except Order.DoesNotExist:
                 pass
 
@@ -186,7 +192,8 @@ def stripe_webhook(request):
         order_id = session.metadata.get('order_id')
         if order_id:
             try:
-                Order.objects.filter(id=order_id).update(payment_status='failed')
+                Order.objects.filter(id=order_id).update(
+                    payment_status='failed')
             except Order.DoesNotExist:
                 pass
 
@@ -195,7 +202,7 @@ def stripe_webhook(request):
 
 @transaction.atomic
 def _fulfill_order(order):
-    """Fulfill order: update status, reduce stock, update product sales count."""
+    'Fulfill order: update status, reduce stock, update product sales count.'
     if order.payment_status == 'completed':
         CartService.clear_cart()
         return  # Already fulfilled

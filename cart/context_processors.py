@@ -1,7 +1,4 @@
-"""Cart context processor."""
-
 from .services import CartService
-
 
 def cart_context(request):
     """Add cart data to all templates."""

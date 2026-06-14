@@ -4,6 +4,11 @@ from . import views
 app_name = 'reviews'
 
 urlpatterns = [
-    path('add/<slug:product_slug>/', views.AddReviewView.as_view(), name='add'),
-    path('delete/<int:review_id>/', views.DeleteReviewView.as_view(), name='delete'),
+    path(
+        'add/<slug:product_slug>/',
+        views.AddReviewView.as_view(), name='add'),
+    path(
+        'delete/<int:review_id>/',
+        views.DeleteReviewView.as_view(),
+        name='delete'),
 ]

@@ -11,7 +11,8 @@ class User(AbstractUser):
     """Extended user model with address and profile information."""
 
     email = models.EmailField(unique=True)
-    avatar = CloudinaryField('avatar', blank=True, null=True, folder='avatars/')
+    avatar = CloudinaryField('avatar', blank=True, null=True,
+                             folder='avatars/')
     phone_number = models.CharField(max_length=20, blank=True)
 
     # Address fields

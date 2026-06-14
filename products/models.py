@@ -25,7 +25,10 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True)
-    image = CloudinaryField('category_image', blank=True, null=True, folder='categories/')
+    image = CloudinaryField(
+        'category_image',
+        blank=True, null=True,
+        folder='categories/')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -50,7 +53,11 @@ class Category(models.Model):
 class Brand(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
-    logo = CloudinaryField('brand_logo', blank=True, null=True, folder='brands/')
+    logo = CloudinaryField(
+        'brand_logo',
+        blank=True,
+        null=True,
+        folder='brands/')
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -77,11 +84,27 @@ class Product(models.Model):
     slug = models.SlugField(unique=True, max_length=300)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    discount_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True)
     main_image = CloudinaryField('product_image', folder='products/')
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
-    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='unisex')
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='products')
+    brand = models.ForeignKey(
+        Brand,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='products')
+    gender = models.CharField(
+        max_length=10,
+        choices=GENDER_CHOICES,
+        default='unisex')
     stock_quantity = models.PositiveIntegerField(default=0)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -135,7 +158,8 @@ class Product(models.Model):
 
     @property
     def is_in_stock(self):
-        return self.stock_quantity > 0 or self.variants.filter(stock_quantity__gt=0).exists()
+        return self.stock_quantity > 0 or self.variants.filter(
+            stock_quantity__gt=0).exists()
 
     def get_main_image_url(self):
         if self.main_image:
@@ -145,7 +169,8 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     """Additional gallery images for a product."""
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='gallery_images')
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='gallery_images')
     image = CloudinaryField('product_gallery', folder='products/gallery/')
     alt_text = models.CharField(max_length=255, blank=True)
     order = models.PositiveIntegerField(default=0)
@@ -160,14 +185,31 @@ class ProductImage(models.Model):
 class ProductVariant(models.Model):
     """Product variants for size and color combinations."""
     SIZE_CHOICES = [
-        ('XS', 'XS'), ('S', 'S'), ('M', 'M'), ('L', 'L'), ('XL', 'XL'), ('XXL', 'XXL'),
-        ('36', '36'), ('37', '37'), ('38', '38'), ('39', '39'), ('40', '40'),
-        ('41', '41'), ('42', '42'), ('43', '43'), ('44', '44'), ('45', '45'),
-        ('46', '46'), ('47', '47'), ('48', '48'),
+        ('XS', 'XS'),
+        ('S', 'S'),
+        ('M', 'M'),
+        ('L', 'L'),
+        ('XL', 'XL'),
+        ('XXL', 'XXL'),
+        ('36', '36'),
+        ('37', '37'),
+        ('38', '38'),
+        ('39', '39'),
+        ('40', '40'),
+        ('41', '41'),
+        ('42', '42'),
+        ('43', '43'),
+        ('44', '44'),
+        ('45', '45'),
+        ('46', '46'),
+        ('47', '47'),
+        ('48', '48'),
         ('ONE SIZE', 'One Size'),
     ]
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='variants'
+        )
     size = models.CharField(max_length=10, choices=SIZE_CHOICES)
     color = models.CharField(max_length=50)
     color_hex = models.CharField(max_length=7, blank=True, default='#000000')
@@ -198,7 +240,8 @@ class HeroBanner(models.Model):
     button_text = models.CharField(max_length=50, default='Shop Now')
     button_url = models.CharField(max_length=255, default='/')
     image = CloudinaryField('hero_banner', folder='banners/')
-    image_mobile = CloudinaryField('hero_banner_mobile', folder='banners/', blank=True, null=True)
+    image_mobile = CloudinaryField(
+        'hero_banner_mobile', folder='banners/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
 

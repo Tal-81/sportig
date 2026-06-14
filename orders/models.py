@@ -29,7 +29,8 @@ class Order(models.Model):
         ('refunded', 'Refunded'),
     ]
 
-    order_number = models.CharField(max_length=20, unique=True, default=generate_order_number)
+    order_number = models.CharField(
+        max_length=20, unique=True, default=generate_order_number)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='orders'
@@ -48,15 +49,19 @@ class Order(models.Model):
 
     # Pricing
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
-    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=100)
-    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    shipping_fee = models.DecimalField(
+        max_digits=10, decimal_places=2, default=100)
+    discount_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=10, decimal_places=2)
 
     coupon_code = models.CharField(max_length=50, blank=True)
     notes = models.TextField(blank=True)
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_status = models.CharField(
+        max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
 
     stripe_session_id = models.CharField(max_length=255, blank=True)
 
@@ -87,14 +92,17 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     """Snapshot of product at time of purchase."""
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    order = models.ForeignKey(
+            Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    variant = models.ForeignKey(ProductVariant, on_delete=models.SET_NULL, null=True, blank=True)
+    variant = models.ForeignKey(
+              ProductVariant, on_delete=models.SET_NULL, null=True, blank=True)
 
     # Snapshot fields
     product_name = models.CharField(max_length=255)
     product_sku = models.CharField(max_length=100, blank=True)
-    variant_info = models.CharField(max_length=100, blank=True)  # e.g. "Black / 42"
+    # e.g. "Black / 42"
+    variant_info = models.CharField(max_length=100, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
 

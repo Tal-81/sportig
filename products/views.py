@@ -6,7 +6,8 @@ otherwise falls back to regular price.
 
 from django.shortcuts import render, get_object_or_404
 from django.views import View
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from django.contrib.postgres.search import (
+    SearchVector, SearchQuery, SearchRank)
 from django.db.models import Min, Max, Case, When, F, DecimalField, Q
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -34,7 +35,7 @@ EFFECTIVE_PRICE_ANNOTATION = Case(
 
 
 def _annotate_effective_price(qs):
-    """Annotate a queryset with 'effective_price' (discount or regular price)."""
+    'Annotate a queryset with 'effective_price' (discount or regular price).'
     return qs.annotate(effective_price=EFFECTIVE_PRICE_ANNOTATION)
 
 
@@ -107,7 +108,7 @@ class ProductListView(View):
         paginator = Paginator(products, self.paginate_by)
         page_obj = paginator.get_page(request.GET.get('page', 1))
 
-        # Price range for the slider/inputs — use real effective minimum/maximum
+        # Price range for slider/inputs — use real effective minimum/maximum
         price_range = Product.objects.filter(is_active=True).annotate(
             effective_price=EFFECTIVE_PRICE_ANNOTATION
         ).aggregate(
@@ -138,7 +139,9 @@ class ProductDetailView(View):
 
     def get(self, request, slug):
         product = get_object_or_404(
-            Product.objects.select_related('category', 'brand').prefetch_related(
+            Product.objects.select_related(
+                'category', 'brand'
+                ).prefetch_related(
                 'gallery_images', 'variants', 'reviews__user'
             ),
             slug=slug, is_active=True

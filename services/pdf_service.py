@@ -14,19 +14,19 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 #  BRANDING CONSTANTS — edit these to customize your invoice
 # ============================================================
 
-COMPANY_NAME      = 'Sportig'
-COMPANY_TAGLINE   = 'Premium Sports & Lifestyle'
-COMPANY_EMAIL     = 'support@sportigsports.com'
-COMPANY_WEBSITE   = 'www.sportigsports.com'
-COMPANY_PHONE     = '+46 8 123 456 78'
-COMPANY_ADDRESS   = 'Drottningsgatan 1, 111 51 Stockholm, Sweden'
+COMPANY_NAME = 'Sportig'
+COMPANY_TAGLINE = 'Premium Sports & Lifestyle'
+COMPANY_EMAIL = 'support@sportigsports.com'
+COMPANY_WEBSITE = 'www.sportigsports.com'
+COMPANY_PHONE = '+46 8 123 456 78'
+COMPANY_ADDRESS = 'Drottningsgatan 1, 111 51 Stockholm, Sweden'
 
 # VAT / Org number shown in footer (leave empty to hide)
-COMPANY_VAT_NO    = 'VAT No: SE556123456701'
-COMPANY_ORG_NO    = 'Org No: 556123-4567'
+COMPANY_VAT_NO = 'VAT No: SE556123456701'
+COMPANY_ORG_NO = 'Org No: 556123-4567'
 
 # Primary brand color (hex) — used for header bar, table header, totals
-PRIMARY_COLOR     = '#111111'
+PRIMARY_COLOR = '#111111'
 
 # Footer message
 FOOTER_TEXT = (
@@ -55,9 +55,9 @@ def generate_invoice_pdf(order):
     )
 
     brand_color = colors.HexColor(PRIMARY_COLOR)
-    light_gray  = colors.HexColor('#F8F8F8')
-    mid_gray    = colors.HexColor('#DDDDDD')
-    text_gray   = colors.HexColor('#666666')
+    light_gray = colors.HexColor('#F8F8F8')
+    mid_gray = colors.HexColor('#DDDDDD')
+    text_gray = colors.HexColor('#666666')
 
     styles = getSampleStyleSheet()
 
@@ -171,9 +171,15 @@ def generate_invoice_pdf(order):
         Paragraph('INVOICE', invoice_number_style),
         Spacer(1, 4),
         Paragraph(f'<b>Order:</b>  #{order.order_number}', invoice_info_style),
-        Paragraph(f'<b>Date:</b>  {order.created_at.strftime("%d %B %Y")}', invoice_info_style),
-        Paragraph(f'<b>Order status:</b>  {order.get_status_display()}', invoice_info_style),
-        Paragraph(f'Payment: {order.get_payment_status_display().upper()}', status_style),
+        Paragraph(
+            f'<b>Date:</b>  {order.created_at.strftime("%d %B %Y")}',
+            invoice_info_style),
+        Paragraph(
+            f'<b>Order status:</b>  {order.get_status_display()}',
+            invoice_info_style),
+        Paragraph(
+            f'Payment: {order.get_payment_status_display().upper()}',
+            status_style),
     ]
 
     header_table = Table(
@@ -241,7 +247,8 @@ def generate_invoice_pdf(order):
     for item in order.items.all():
         variant_sku = item.variant_info or ''
         if item.product_sku:
-            variant_sku += f'\n{item.product_sku}' if variant_sku else item.product_sku
+            variant_sku += f'\n{item.product_sku}' if variant_sku
+            else item.product_sku
 
         items_data.append([
             Paragraph(item.product_name, normal_style),
@@ -287,7 +294,8 @@ def generate_invoice_pdf(order):
             'TVal', parent=styles['Normal'],
             fontSize=9 if not bold else 13,
             fontName='Helvetica-Bold' if bold else 'Helvetica',
-            textColor=color or (brand_color if bold else colors.HexColor('#222222')),
+            textColor=color or (
+                brand_color if bold else colors.HexColor('#222222')),
             alignment=TA_RIGHT,
         )
         return ['', Paragraph(label, lbl_style), Paragraph(value, val_style)]
@@ -298,17 +306,25 @@ def generate_invoice_pdf(order):
     ]
 
     if order.discount_amount and order.discount_amount > 0:
-        discount_label = f'Discount ({order.coupon_code}):' if order.coupon_code else 'Discount:'
+        discount_label = (
+            f'Discount ({order.coupon_code}):'
+            if order.coupon_code
+            else 'Discount:'
+        )
         totals_data.append(
-            totals_row(discount_label, f'-{order.discount_amount:,.2f} kr',
-                       color=colors.HexColor('#dc2626'))
+            totals_row(
+                discount_label,
+                f'-{order.discount_amount:,.2f} kr',
+                color=colors.HexColor('#dc2626')
+            )
         )
 
     # Optional VAT line
     if VAT_RATE:
         vat_amount = order.subtotal * VAT_RATE
         totals_data.append(
-            totals_row(f'VAT ({int(VAT_RATE * 100)}%):', f'{vat_amount:,.2f} kr')
+            totals_row(
+                f'VAT ({int(VAT_RATE * 100)}%):', f'{vat_amount:,.2f} kr')
         )
 
     totals_data.append(

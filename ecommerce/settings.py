@@ -104,19 +104,39 @@ else:
 
 # ─── Password Validation ─────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-     'OPTIONS': {'min_length': 8}},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'UserAttributeSimilarityValidator'
+        )
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'MinimumLengthValidator'
+        ),
+        'OPTIONS': {'min_length': 8}
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'CommonPasswordValidator'
+        )
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'NumericPasswordValidator'
+        )
+    },
 ]
 
 AUTH_USER_MODEL = 'users.User'
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE     = 'Europe/Stockholm'
-USE_I18N      = True
-USE_TZ        = True
+TIME_ZONE = 'Europe/Stockholm'
+USE_I18N = True
+USE_TZ = True
 
 # ─── Static Files ────────────────────────────────────────
 STATIC_URL = '/static/'
@@ -128,60 +148,62 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
-    'API_KEY':    os.environ.get('CLOUDINARY_API_KEY', ''),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
 }
-MEDIA_URL  = '/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ─── Auth ─────────────────────────────────────────────────
-LOGIN_URL           = '/users/login/'
-LOGIN_REDIRECT_URL  = '/'
+LOGIN_URL = '/users/login/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # ─── Session ─────────────────────────────────────────────
-SESSION_COOKIE_AGE      = 600
+SESSION_COOKIE_AGE = 600
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE   = not DEBUG   # True in production 
+SESSION_COOKIE_SECURE = not DEBUG   # True in production
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 # ─── CSRF ────────────────────────────────────────────────
 CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE   = not DEBUG      # True in production
+CSRF_COOKIE_SECURE = not DEBUG      # True in production
 
 # ─── Security Headers ────────────────────────────────────
-SECURE_BROWSER_XSS_FILTER   = True
+SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS             = 'DENY'
+X_FRAME_OPTIONS = 'DENY'
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT            = True
-    SECURE_HSTS_SECONDS            = 31536000
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD            = True
-    SECURE_PROXY_SSL_HEADER        = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # ─── Email ───────────────────────────────────────────────
-EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST          = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT          = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@sportig.com')
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL', 'noreply@sportig.com'
+)
 
 # ─── Stripe ──────────────────────────────────────────────
-STRIPE_PUBLIC_KEY      = os.environ.get('STRIPE_PUBLIC_KEY', '')
-STRIPE_SECRET_KEY      = os.environ.get('STRIPE_SECRET_KEY', '')
-STRIPE_WEBHOOK_SECRET  = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 
 # ─── App Constants ───────────────────────────────────────
-CURRENCY        = 'SEK'
+CURRENCY = 'SEK'
 CURRENCY_SYMBOL = 'kr'
-SHIPPING_COST   = 100
+SHIPPING_COST = 100
 
 # ─── Cache (Redis optional) ──────────────────────────────
 REDIS_URL = os.environ.get('REDIS_URL')

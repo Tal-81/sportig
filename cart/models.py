@@ -1,7 +1,3 @@
-"""
-Cart models: supports both session-based (guests) and database-based (logged-in users) carts.
-"""
-
 from django.db import models
 from django.conf import settings
 from products.models import Product, ProductVariant
@@ -24,7 +20,9 @@ class Cart(models.Model):
 
     @property
     def subtotal(self):
-        return sum(item.line_total for item in self.items.select_related('product', 'variant'))
+        return sum(item.line_total for item in self.items.select_related(
+            'product',
+            'variant'))
 
     @property
     def shipping_cost(self):
@@ -37,9 +35,16 @@ class Cart(models.Model):
 
 class CartItem(models.Model):
     """Individual item in a cart."""
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE,
+        related_name='items'
+        )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    variant = models.ForeignKey(ProductVariant, on_delete=models.SET_NULL, null=True, blank=True)
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.SET_NULL,
+        null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
