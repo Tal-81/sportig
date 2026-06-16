@@ -247,8 +247,7 @@ def generate_invoice_pdf(order):
     for item in order.items.all():
         variant_sku = item.variant_info or ''
         if item.product_sku:
-            variant_sku += f'\n{item.product_sku}' if variant_sku
-            else item.product_sku
+            variant_sku += f'\n{item.product_sku}' if variant_sku else item.product_sku
 
         items_data.append([
             Paragraph(item.product_name, normal_style),
