@@ -123,7 +123,7 @@ class CheckoutView(View):
             request.session['pending_order_id'] = order.id
             return redirect('payments:checkout', order_id=order.id)
 
-        # إعادة عرض النموذج مع الأخطاء
+        # return view the model with errors
         coupon_discount = 0
         coupon_code = request.session.get('coupon_code')
         if coupon_code:

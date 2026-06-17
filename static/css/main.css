@@ -35,9 +35,14 @@
   padding: 0; 
 }
 
-html { 
+html, body { 
   scroll-behavior: smooth; 
-  font-size: 16px; 
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 100vh;
+  max-width: 100%;
 }
 
 body {
@@ -1373,7 +1378,7 @@ textarea {
   opacity: 1; 
 }
 
-.swiper-wrapper[aria-live="polite"] {
+.cats-swiper .swiper-wrapper[aria-live="polite"] {
   display: flex;
   padding: 4px 0; 
   overflow-x: auto; 
